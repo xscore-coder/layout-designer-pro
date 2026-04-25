@@ -310,10 +310,8 @@ export const useFloorPlan = create<Store>()(
                     newSeats[i] = {
                       ...newSeats[i],
                       type: oldSeats[i].type,
-                      agentName: oldSeats[i].agentName,
-                      shift: oldSeats[i].shift,
-                      team: oldSeats[i].team,
                       note: oldSeats[i].note,
+                      waslaSctFeedback: oldSeats[i].waslaSctFeedback,
                       problemCount: oldSeats[i].problemCount,
                       history: oldSeats[i].history,
                     };
@@ -659,8 +657,6 @@ export const useFloorPlan = create<Store>()(
                 const problems = r.problems ?? 0;
                 return {
                   ...seat,
-                  agentName: r.agent ?? seat.agentName,
-                  shift: r.shift ?? seat.shift,
                   problemCount: seat.problemCount + problems,
                   type: problems > 0 ? "problem" : seat.type,
                   history:

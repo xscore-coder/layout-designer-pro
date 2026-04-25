@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ALL_SHAPES, shapeLabel } from "@/lib/shapes";
-import type { ZoneShape, Shift } from "@/types/floorplan";
+import type { ZoneShape } from "@/types/floorplan";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
@@ -15,8 +15,6 @@ import {
   Lock, Unlock, Copy, Trash2, Plus, AlertTriangle, Info, Ungroup,
 } from "lucide-react";
 import { toast } from "sonner";
-
-const SHIFTS: Shift[] = ["off", "morning", "evening", "night"];
 
 export function Inspector() {
   const floor = useActiveFloor();
@@ -239,37 +237,23 @@ export function Inspector() {
                   />
                 </div>
                 <div>
-                  <Label>Agent name</Label>
-                  <Input
-                    value={seat.agentName ?? ""}
-                    onChange={(e) => updateSeat(zone.id, seat.id, { agentName: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label>Shift</Label>
-                  <Select
-                    value={seat.shift ?? "off"}
-                    onValueChange={(v) => updateSeat(zone.id, seat.id, { shift: v as Shift })}
-                  >
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {SHIFTS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Team</Label>
-                  <Input
-                    value={seat.team ?? ""}
-                    onChange={(e) => updateSeat(zone.id, seat.id, { team: e.target.value })}
-                  />
-                </div>
-                <div>
                   <Label>Note</Label>
                   <Textarea
                     rows={2}
+                    dir="auto"
                     value={seat.note ?? ""}
                     onChange={(e) => updateSeat(zone.id, seat.id, { note: e.target.value })}
+                    placeholder="ملاحظات…"
+                  />
+                </div>
+                <div>
+                  <Label>Wasla SCT Feedback</Label>
+                  <Textarea
+                    rows={2}
+                    dir="auto"
+                    value={seat.waslaSctFeedback ?? ""}
+                    onChange={(e) => updateSeat(zone.id, seat.id, { waslaSctFeedback: e.target.value })}
+                    placeholder="Wasla SCT feedback…"
                   />
                 </div>
 
