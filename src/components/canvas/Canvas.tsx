@@ -92,7 +92,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
     ...floor.zones.flatMap((z) => z.seats.map((s) => s.problemCount))
   );
 
-  const otherZones = floor.zones.filter((z) => z.id !== selectedZoneId);
+  const otherZones = floor.zones.filter((z) => !selectedZoneIds.includes(z.id));
 
   // Theme styling for canvas background
   const themeBg: Record<string, string> = {
@@ -111,8 +111,8 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
         if (e.button === 1 || (e.button === 0 && e.altKey)) {
           e.preventDefault();
           setPan({ ox: e.clientX, oy: e.clientY, sx: panOffset.x, sy: panOffset.y });
-        } else if (e.target === e.currentTarget) {
-          selectZone(null);
+        } else if (e.target === e.currentTarget || (e.target as HTMLElement).closest("[data-canvas-stage]") === stageRef.current && e.target === stageRef.current) {
+          clearSelection();
         }
       }}
       onWheel={(e) => {
@@ -124,6 +124,12 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
     >
       <div
         ref={stageRef}
+        data-canvas-stage
+        onMouseDown={(e) => {
+          if (e.target === e.currentTarget && e.button === 0 && !e.altKey) {
+            clearSelection();
+          }
+        }}
         className="absolute origin-top-left"
         style={{
           transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoom})`,
