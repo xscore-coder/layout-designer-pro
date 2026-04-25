@@ -175,6 +175,14 @@ export function Inspector() {
                 </div>
 
                 <div>
+                  <Label>PC Number</Label>
+                  <Input
+                    value={seat.pcNumber}
+                    onChange={(e) => updateSeat(zone.id, seat.id, { pcNumber: e.target.value })}
+                    placeholder="e.g. PC-101"
+                  />
+                </div>
+                <div>
                   <Label>Agent name</Label>
                   <Input
                     value={seat.agentName ?? ""}

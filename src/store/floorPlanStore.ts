@@ -10,7 +10,11 @@ import type {
   ChangeLogEntry,
   Shift,
   SpaceKind,
+  ThemePreset,
 } from "@/types/floorplan";
+
+const SNAP_GRID = 10;
+const snapVal = (n: number, enabled: boolean) => (enabled ? Math.round(n / SNAP_GRID) * SNAP_GRID : n);
 
 const uid = () => Math.random().toString(36).slice(2, 10);
 
@@ -79,6 +83,13 @@ interface Store extends FloorPlanState {
   setZoom: (z: number) => void;
   toggleDark: () => void;
   toggleHeatmap: () => void;
+  toggleSnap: () => void;
+  toggleSmartGuides: () => void;
+  toggleLegend: () => void;
+  toggleCompass: () => void;
+  toggleScale: () => void;
+  setTheme: (t: ThemePreset) => void;
+  renumberZones: () => void;
 
   // import
   importPCs: (rows: { pc: string; problems?: number; agent?: string; shift?: Shift }[]) => void;
@@ -120,6 +131,12 @@ export const useFloorPlan = create<Store>()(
       darkMode: false,
       heatmap: false,
       zoom: 1,
+      snapToGrid: true,
+      smartGuides: true,
+      showLegend: true,
+      showCompass: true,
+      showScale: true,
+      theme: "modern",
       past: [],
       future: [],
       changeLog: [],
@@ -212,14 +229,22 @@ export const useFloorPlan = create<Store>()(
         }),
 
       updateZone: (id, patch) =>
-        set((s) =>
-          withHistory(s, {
+        set((s) => {
+          const snap = s.snapToGrid;
+          const snapped: Partial<Zone> = { ...patch };
+          if (snap) {
+            if (typeof snapped.x === "number") snapped.x = snapVal(snapped.x, true);
+            if (typeof snapped.y === "number") snapped.y = snapVal(snapped.y, true);
+            if (typeof snapped.width === "number") snapped.width = snapVal(snapped.width, true);
+            if (typeof snapped.height === "number") snapped.height = snapVal(snapped.height, true);
+          }
+          return withHistory(s, {
             floors: updateActiveFloor(s, (f) => ({
               ...f,
               zones: f.zones.map((z) => {
                 if (z.id !== id) return z;
                 if (z.locked && !("locked" in patch)) return z;
-                let next = { ...z, ...patch };
+                let next = { ...z, ...snapped };
                 // re-build seats if grid/start changed
                 if (
                   z.kind === "zone" &&
@@ -248,8 +273,8 @@ export const useFloorPlan = create<Store>()(
               }),
             })),
             changeLog: log(s, "Updated zone"),
-          })
-        ),
+          });
+        }),
 
       removeZone: (id) =>
         set((s) =>
@@ -425,6 +450,24 @@ export const useFloorPlan = create<Store>()(
           return { darkMode: dark };
         }),
       toggleHeatmap: () => set((s) => ({ heatmap: !s.heatmap })),
+      toggleSnap: () => set((s) => ({ snapToGrid: !s.snapToGrid })),
+      toggleSmartGuides: () => set((s) => ({ smartGuides: !s.smartGuides })),
+      toggleLegend: () => set((s) => ({ showLegend: !s.showLegend })),
+      toggleCompass: () => set((s) => ({ showCompass: !s.showCompass })),
+      toggleScale: () => set((s) => ({ showScale: !s.showScale })),
+      setTheme: (t) => set({ theme: t }),
+      renumberZones: () =>
+        set((s) =>
+          withHistory(s, {
+            floors: updateActiveFloor(s, (f) => ({
+              ...f,
+              zones: f.zones.map((z, i) =>
+                z.kind === "zone" ? { ...z, name: `Z${i + 1} • ${z.name.replace(/^Z\d+\s*•\s*/, "")}` } : z
+              ),
+            })),
+            changeLog: log(s, "Renumbered zones"),
+          })
+        ),
 
       importPCs: (rows) =>
         set((s) => {
@@ -518,6 +561,12 @@ export const useFloorPlan = create<Store>()(
         activeFloorId: s.activeFloorId,
         darkMode: s.darkMode,
         changeLog: s.changeLog,
+        snapToGrid: s.snapToGrid,
+        smartGuides: s.smartGuides,
+        showLegend: s.showLegend,
+        showCompass: s.showCompass,
+        showScale: s.showScale,
+        theme: s.theme,
       }),
       onRehydrateStorage: () => (state) => {
         if (state?.darkMode) document.documentElement.classList.add("dark");

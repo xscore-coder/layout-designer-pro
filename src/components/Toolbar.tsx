@@ -4,13 +4,15 @@ import { Input } from "@/components/ui/input";
 import { useFloorPlan } from "@/store/floorPlanStore";
 import {
   Plus, Square, Combine, History, FileBarChart, Search, Download,
-  Upload, Undo2, Redo2, Moon, Sun, Flame, LayoutGrid, Trash2, FileSpreadsheet,
+  Upload, Undo2, Redo2, Moon, Sun, Flame, LayoutGrid, Trash2, FileSpreadsheet, Printer,
 } from "lucide-react";
 import { AddZoneDialog } from "./dialogs/AddZoneDialog";
 import { AddSpaceDialog } from "./dialogs/AddSpaceDialog";
 import { MergeZonesDialog } from "./dialogs/MergeZonesDialog";
 import { ReportDialog } from "./dialogs/ReportDialog";
 import { HistoryDrawer } from "./dialogs/HistoryDrawer";
+import { PrintDialog } from "./dialogs/PrintDialog";
+import { ThemePicker } from "./ThemePicker";
 import { toast } from "sonner";
 import Papa from "papaparse";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -18,14 +20,16 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 interface Props {
   search: string;
   onSearchChange: (v: string) => void;
+  getStageEl: () => HTMLDivElement | null;
 }
 
-export function Toolbar({ search, onSearchChange }: Props) {
+export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
   const [zoneOpen, setZoneOpen] = useState(false);
   const [spaceOpen, setSpaceOpen] = useState(false);
   const [mergeOpen, setMergeOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [printOpen, setPrintOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const jsonRef = useRef<HTMLInputElement>(null);
 
@@ -158,6 +162,14 @@ export function Toolbar({ search, onSearchChange }: Props) {
           </Button>
 
           <Tooltip><TooltipTrigger asChild>
+            <Button size="icon" variant="default" className="bg-gradient-primary text-primary-foreground" onClick={() => setPrintOpen(true)}>
+              <Printer className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger><TooltipContent>Print / Export PDF</TooltipContent></Tooltip>
+
+          <ThemePicker />
+
+          <Tooltip><TooltipTrigger asChild>
             <Button size="icon" variant="ghost" onClick={() => fileRef.current?.click()}>
               <Upload className="h-4 w-4" />
             </Button>
@@ -205,6 +217,7 @@ export function Toolbar({ search, onSearchChange }: Props) {
       <MergeZonesDialog open={mergeOpen} onOpenChange={setMergeOpen} />
       <ReportDialog open={reportOpen} onOpenChange={setReportOpen} />
       <HistoryDrawer open={historyOpen} onOpenChange={setHistoryOpen} />
+      <PrintDialog open={printOpen} onOpenChange={setPrintOpen} getStageEl={getStageEl} />
     </>
   );
 }
