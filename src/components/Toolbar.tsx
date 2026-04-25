@@ -134,6 +134,17 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
         <Button size="sm" variant="outline" onClick={() => setMergeOpen(true)}>
           <Combine className="h-4 w-4 mr-1" /> Merge
         </Button>
+        <Tooltip><TooltipTrigger asChild>
+          <Button size="sm" variant="outline" disabled={selectedZoneIds.length < 1}
+            onClick={() => { groupSelected(); toast.success("Grouped"); }}>
+            <Group className="h-4 w-4 mr-1" /> Group
+          </Button>
+        </TooltipTrigger><TooltipContent>Group selected into a Space</TooltipContent></Tooltip>
+        <Tooltip><TooltipTrigger asChild>
+          <Button size="sm" variant="outline" onClick={() => setTemplatesOpen(true)}>
+            <LayoutTemplate className="h-4 w-4 mr-1" /> Templates
+          </Button>
+        </TooltipTrigger><TooltipContent>Insert pre-built layout</TooltipContent></Tooltip>
 
         <div className="h-6 w-px bg-border mx-1" />
 
