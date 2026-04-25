@@ -42,6 +42,8 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
   const [versionsOpen, setVersionsOpen] = useState(false);
   const [templatesOpen, setTemplatesOpen] = useState(false);
   const [dashboardOpen, setDashboardOpen] = useState(false);
+  const [clearOpen, setClearOpen] = useState(false);
+  const [clearConfirmText, setClearConfirmText] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
   const jsonRef = useRef<HTMLInputElement>(null);
 
