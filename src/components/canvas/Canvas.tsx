@@ -30,6 +30,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
   const showScale = useFloorPlan((s) => s.showScale);
   const showLegend = useFloorPlan((s) => s.showLegend);
   const theme = useFloorPlan((s) => s.theme);
+  const groupSelected = useFloorPlan((s) => s.groupSelectedAsSpace);
   const containerRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
