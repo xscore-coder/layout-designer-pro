@@ -3,6 +3,7 @@ import { useActiveFloor, useFloorPlan } from "@/store/floorPlanStore";
 import { Zone } from "./Zone";
 import { Button } from "@/components/ui/button";
 import { ZoomIn, ZoomOut, Maximize, Compass, Ruler } from "lucide-react";
+import { AlignmentToolbar } from "@/components/AlignmentToolbar";
 
 interface Props { searchQuery: string }
 
@@ -16,10 +17,14 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
   const zoom = useFloorPlan((s) => s.zoom);
   const setZoom = useFloorPlan((s) => s.setZoom);
   const selectZone = useFloorPlan((s) => s.selectZone);
+  const clearSelection = useFloorPlan((s) => s.clearSelection);
   const removeZone = useFloorPlan((s) => s.removeZone);
   const selectedZoneId = useFloorPlan((s) => s.selectedZoneId);
+  const selectedZoneIds = useFloorPlan((s) => s.selectedZoneIds);
+  const moveSelectedBy = useFloorPlan((s) => s.moveSelectedBy);
   const undo = useFloorPlan((s) => s.undo);
   const redo = useFloorPlan((s) => s.redo);
+  const duplicateZone = useFloorPlan((s) => s.duplicateZone);
   const showCompass = useFloorPlan((s) => s.showCompass);
   const showScale = useFloorPlan((s) => s.showScale);
   const showLegend = useFloorPlan((s) => s.showLegend);
@@ -44,16 +49,30 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
       } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "y") {
         e.preventDefault();
         redo();
-      } else if (e.key === "Delete" || e.key === "Backspace") {
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "d") {
         if (selectedZoneId) {
           e.preventDefault();
-          removeZone(selectedZoneId);
+          duplicateZone(selectedZoneId);
         }
+      } else if (e.key === "Escape") {
+        clearSelection();
+      } else if (e.key === "Delete" || e.key === "Backspace") {
+        if (selectedZoneIds.length) {
+          e.preventDefault();
+          selectedZoneIds.forEach((id) => removeZone(id));
+        }
+      } else if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
+        if (!selectedZoneIds.length) return;
+        e.preventDefault();
+        const step = e.shiftKey ? 10 : 1;
+        const dx = e.key === "ArrowLeft" ? -step : e.key === "ArrowRight" ? step : 0;
+        const dy = e.key === "ArrowUp" ? -step : e.key === "ArrowDown" ? step : 0;
+        moveSelectedBy(dx, dy);
       }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [undo, redo, selectedZoneId, removeZone]);
+  }, [undo, redo, selectedZoneId, selectedZoneIds, removeZone, moveSelectedBy, clearSelection, duplicateZone]);
 
   useEffect(() => {
     if (!pan) return;
@@ -74,7 +93,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
     ...floor.zones.flatMap((z) => z.seats.map((s) => s.problemCount))
   );
 
-  const otherZones = floor.zones.filter((z) => z.id !== selectedZoneId);
+  const otherZones = floor.zones.filter((z) => !selectedZoneIds.includes(z.id));
 
   // Theme styling for canvas background
   const themeBg: Record<string, string> = {
@@ -93,8 +112,8 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
         if (e.button === 1 || (e.button === 0 && e.altKey)) {
           e.preventDefault();
           setPan({ ox: e.clientX, oy: e.clientY, sx: panOffset.x, sy: panOffset.y });
-        } else if (e.target === e.currentTarget) {
-          selectZone(null);
+        } else if (e.target === e.currentTarget || (e.target as HTMLElement).closest("[data-canvas-stage]") === stageRef.current && e.target === stageRef.current) {
+          clearSelection();
         }
       }}
       onWheel={(e) => {
@@ -106,6 +125,12 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
     >
       <div
         ref={stageRef}
+        data-canvas-stage
+        onMouseDown={(e) => {
+          if (e.target === e.currentTarget && e.button === 0 && !e.altKey) {
+            clearSelection();
+          }
+        }}
         className="absolute origin-top-left"
         style={{
           transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoom})`,
@@ -124,6 +149,9 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
           />
         ))}
       </div>
+
+      {/* Multi-select Alignment toolbar */}
+      <AlignmentToolbar />
 
       {/* Map Essentials Overlays */}
       {showLegend && <LegendCard />}

@@ -36,6 +36,8 @@ export interface Zone {
   width: number;
   height: number;
   locked: boolean;
+  rotation?: number; // degrees
+  zIndex?: number;
   notes?: string;
   seats: Seat[]; // length = rows*cols
   kind: "zone" | "space";
@@ -54,7 +56,9 @@ export interface FloorPlanState {
   floors: Floor[];
   activeFloorId: string;
   selectedZoneId: string | null;
+  selectedZoneIds: string[];
   selectedSeatId: string | null;
+  collisionDetection: boolean;
   darkMode: boolean;
   heatmap: boolean;
   zoom: number;

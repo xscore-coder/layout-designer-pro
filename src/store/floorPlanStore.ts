@@ -78,7 +78,9 @@ interface Store extends FloorPlanState {
   addSeatHistory: (zoneId: string, seatId: string, type: "problem" | "fix" | "change" | "note", description: string) => void;
 
   // selection / view
-  selectZone: (id: string | null) => void;
+  selectZone: (id: string | null, opts?: { additive?: boolean }) => void;
+  selectMany: (ids: string[]) => void;
+  clearSelection: () => void;
   selectSeat: (id: string | null) => void;
   setZoom: (z: number) => void;
   toggleDark: () => void;
@@ -88,8 +90,16 @@ interface Store extends FloorPlanState {
   toggleLegend: () => void;
   toggleCompass: () => void;
   toggleScale: () => void;
+  toggleCollision: () => void;
   setTheme: (t: ThemePreset) => void;
   renumberZones: () => void;
+
+  // multi-zone ops
+  moveSelectedBy: (dx: number, dy: number) => void;
+  alignSelected: (mode: "left" | "right" | "top" | "bottom" | "centerX" | "centerY") => void;
+  distributeSelected: (axis: "horizontal" | "vertical") => void;
+  bringSelectedToFront: () => void;
+  sendSelectedToBack: () => void;
 
   // import
   importPCs: (rows: { pc: string; problems?: number; agent?: string; shift?: Shift }[]) => void;
@@ -127,6 +137,7 @@ export const useFloorPlan = create<Store>()(
       floors: [initialFloor],
       activeFloorId: initialFloor.id,
       selectedZoneId: null,
+      selectedZoneIds: [],
       selectedSeatId: null,
       darkMode: false,
       heatmap: false,
@@ -136,6 +147,7 @@ export const useFloorPlan = create<Store>()(
       showLegend: true,
       showCompass: true,
       showScale: true,
+      collisionDetection: false,
       theme: "modern",
       past: [],
       future: [],
@@ -440,7 +452,18 @@ export const useFloorPlan = create<Store>()(
           })),
         })),
 
-      selectZone: (id) => set({ selectedZoneId: id, selectedSeatId: null }),
+      selectZone: (id, opts) =>
+        set((s) => {
+          if (id === null) return { selectedZoneId: null, selectedZoneIds: [], selectedSeatId: null };
+          if (opts?.additive) {
+            const exists = s.selectedZoneIds.includes(id);
+            const ids = exists ? s.selectedZoneIds.filter((x) => x !== id) : [...s.selectedZoneIds, id];
+            return { selectedZoneIds: ids, selectedZoneId: ids[ids.length - 1] ?? null, selectedSeatId: null };
+          }
+          return { selectedZoneId: id, selectedZoneIds: [id], selectedSeatId: null };
+        }),
+      selectMany: (ids) => set({ selectedZoneIds: ids, selectedZoneId: ids[ids.length - 1] ?? null }),
+      clearSelection: () => set({ selectedZoneId: null, selectedZoneIds: [], selectedSeatId: null }),
       selectSeat: (id) => set({ selectedSeatId: id }),
       setZoom: (z) => set({ zoom: Math.min(2, Math.max(0.4, z)) }),
       toggleDark: () =>
@@ -455,6 +478,7 @@ export const useFloorPlan = create<Store>()(
       toggleLegend: () => set((s) => ({ showLegend: !s.showLegend })),
       toggleCompass: () => set((s) => ({ showCompass: !s.showCompass })),
       toggleScale: () => set((s) => ({ showScale: !s.showScale })),
+      toggleCollision: () => set((s) => ({ collisionDetection: !s.collisionDetection })),
       setTheme: (t) => set({ theme: t }),
       renumberZones: () =>
         set((s) =>
@@ -468,6 +492,118 @@ export const useFloorPlan = create<Store>()(
             changeLog: log(s, "Renumbered zones"),
           })
         ),
+
+      moveSelectedBy: (dx, dy) =>
+        set((s) => {
+          const ids = new Set(s.selectedZoneIds);
+          if (!ids.size) return {};
+          return withHistory(s, {
+            floors: updateActiveFloor(s, (f) => ({
+              ...f,
+              zones: f.zones.map((z) =>
+                ids.has(z.id) && !z.locked
+                  ? { ...z, x: Math.max(0, z.x + dx), y: Math.max(0, z.y + dy) }
+                  : z
+              ),
+            })),
+            changeLog: log(s, "Moved selection"),
+          });
+        }),
+
+      alignSelected: (mode) =>
+        set((s) => {
+          const f = activeFloor(s);
+          if (!f) return {};
+          const sel = f.zones.filter((z) => s.selectedZoneIds.includes(z.id) && !z.locked);
+          if (sel.length < 2) return {};
+          const lefts = sel.map((z) => z.x);
+          const rights = sel.map((z) => z.x + z.width);
+          const tops = sel.map((z) => z.y);
+          const bottoms = sel.map((z) => z.y + z.height);
+          const minL = Math.min(...lefts), maxR = Math.max(...rights);
+          const minT = Math.min(...tops), maxB = Math.max(...bottoms);
+          const cx = (minL + maxR) / 2, cy = (minT + maxB) / 2;
+          const ids = new Set(sel.map((z) => z.id));
+          return withHistory(s, {
+            floors: updateActiveFloor(s, (fl) => ({
+              ...fl,
+              zones: fl.zones.map((z) => {
+                if (!ids.has(z.id)) return z;
+                switch (mode) {
+                  case "left": return { ...z, x: minL };
+                  case "right": return { ...z, x: maxR - z.width };
+                  case "top": return { ...z, y: minT };
+                  case "bottom": return { ...z, y: maxB - z.height };
+                  case "centerX": return { ...z, x: cx - z.width / 2 };
+                  case "centerY": return { ...z, y: cy - z.height / 2 };
+                }
+              }),
+            })),
+            changeLog: log(s, `Aligned ${mode}`),
+          });
+        }),
+
+      distributeSelected: (axis) =>
+        set((s) => {
+          const f = activeFloor(s);
+          if (!f) return {};
+          const sel = f.zones.filter((z) => s.selectedZoneIds.includes(z.id) && !z.locked);
+          if (sel.length < 3) return {};
+          const sorted = [...sel].sort((a, b) => (axis === "horizontal" ? a.x - b.x : a.y - b.y));
+          const first = sorted[0], last = sorted[sorted.length - 1];
+          const totalSize = sorted.reduce((acc, z) => acc + (axis === "horizontal" ? z.width : z.height), 0);
+          const span = axis === "horizontal"
+            ? (last.x + last.width) - first.x
+            : (last.y + last.height) - first.y;
+          const gap = (span - totalSize) / (sorted.length - 1);
+          let cursor = axis === "horizontal" ? first.x : first.y;
+          const positions = new Map<string, number>();
+          for (const z of sorted) {
+            positions.set(z.id, cursor);
+            cursor += (axis === "horizontal" ? z.width : z.height) + gap;
+          }
+          return withHistory(s, {
+            floors: updateActiveFloor(s, (fl) => ({
+              ...fl,
+              zones: fl.zones.map((z) =>
+                positions.has(z.id)
+                  ? axis === "horizontal"
+                    ? { ...z, x: positions.get(z.id)! }
+                    : { ...z, y: positions.get(z.id)! }
+                  : z
+              ),
+            })),
+            changeLog: log(s, `Distributed ${axis}`),
+          });
+        }),
+
+      bringSelectedToFront: () =>
+        set((s) => {
+          const ids = new Set(s.selectedZoneIds);
+          if (!ids.size) return {};
+          return withHistory(s, {
+            floors: updateActiveFloor(s, (f) => {
+              const others = f.zones.filter((z) => !ids.has(z.id));
+              const selected = f.zones.filter((z) => ids.has(z.id));
+              return { ...f, zones: [...others, ...selected] };
+            }),
+            changeLog: log(s, "Brought to front"),
+          });
+        }),
+
+      sendSelectedToBack: () =>
+        set((s) => {
+          const ids = new Set(s.selectedZoneIds);
+          if (!ids.size) return {};
+          return withHistory(s, {
+            floors: updateActiveFloor(s, (f) => {
+              const others = f.zones.filter((z) => !ids.has(z.id));
+              const selected = f.zones.filter((z) => ids.has(z.id));
+              return { ...f, zones: [...selected, ...others] };
+            }),
+            changeLog: log(s, "Sent to back"),
+          });
+        }),
 
       importPCs: (rows) =>
         set((s) => {
@@ -566,6 +702,7 @@ export const useFloorPlan = create<Store>()(
         showLegend: s.showLegend,
         showCompass: s.showCompass,
         showScale: s.showScale,
+        collisionDetection: s.collisionDetection,
         theme: s.theme,
       }),
       onRehydrateStorage: () => (state) => {
