@@ -308,7 +308,8 @@ export function Zone({ zone, searchQuery, zoom, heatmapMax, otherZones = [] }: P
             className={cn(
               "absolute group transition-shadow",
               selected && "z-20",
-              drag && "opacity-40"
+              drag && "opacity-40",
+              zone.hidden && "opacity-20 pointer-events-none"
             )}
             style={{
               left: zone.x,
@@ -325,15 +326,29 @@ export function Zone({ zone, searchQuery, zoom, heatmapMax, otherZones = [] }: P
                 "h-full w-full relative overflow-hidden border-2 transition-all",
                 zone.shape === "rounded" ? "rounded-3xl" : zone.shape === "rect" ? "rounded-md" : "",
                 isSpace
-                  ? "bg-muted/40 border-dashed border-muted-foreground/40"
-                  : "bg-card/95 backdrop-blur shadow-md",
+                  ? zone.spaceKind === "group"
+                    ? "border-dashed"
+                    : "bg-muted/40 border-dashed border-muted-foreground/40"
+                  : "backdrop-blur shadow-md",
                 selected && !isSpace && "shadow-lg",
                 isMulti && !selected && "ring-2 ring-accent ring-offset-2 ring-offset-background/50",
               )}
               style={{
                 clipPath: clip,
-                borderColor: selected ? `hsl(var(--ring))` : isSpace ? undefined : `hsl(${zone.color})`,
-                backgroundColor: !isSpace ? `hsl(${zone.color} / 0.06)` : undefined,
+                borderColor: selected
+                  ? `hsl(var(--ring))`
+                  : zone.borderColor
+                    ? `hsl(${zone.borderColor})`
+                    : isSpace
+                      ? zone.spaceKind === "group" ? `hsl(${zone.color})` : undefined
+                      : `hsl(${zone.color})`,
+                background: !isSpace
+                  ? zone.fillMode === "gradient" && zone.gradientTo
+                    ? `linear-gradient(135deg, hsl(${zone.color} / ${(zone.opacity ?? 1) * 0.15}), hsl(${zone.gradientTo} / ${(zone.opacity ?? 1) * 0.15}))`
+                    : `hsl(${zone.color} / ${(zone.opacity ?? 1) * 0.06})`
+                  : zone.spaceKind === "group"
+                    ? `hsl(${zone.color} / 0.04)`
+                    : undefined,
               }}
             >
               {/* HEADER = drag handle */}
