@@ -181,10 +181,22 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
           </TooltipTrigger><TooltipContent>Collision detection</TooltipContent></Tooltip>
 
           <Tooltip><TooltipTrigger asChild>
-            <Button size="icon" variant="ghost" onClick={() => setHistoryOpen(true)}>
+            <Button size="icon" variant={showMiniMap ? "default" : "ghost"} onClick={toggleMiniMap}>
+              <MapIcon className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger><TooltipContent>Mini-Map</TooltipContent></Tooltip>
+
+          <Tooltip><TooltipTrigger asChild>
+            <Button size="icon" variant="ghost" onClick={() => { saveVersion(); toast.success("Snapshot saved"); }}>
+              <Save className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger><TooltipContent>Save snapshot</TooltipContent></Tooltip>
+
+          <Tooltip><TooltipTrigger asChild>
+            <Button size="icon" variant="ghost" onClick={() => setVersionsOpen(true)}>
               <History className="h-4 w-4" />
             </Button>
-          </TooltipTrigger><TooltipContent>Change history</TooltipContent></Tooltip>
+          </TooltipTrigger><TooltipContent>Versions</TooltipContent></Tooltip>
 
           <Button size="sm" variant="ghost" onClick={() => setReportOpen(true)}>
             <FileBarChart className="h-4 w-4 mr-1" /> Report
