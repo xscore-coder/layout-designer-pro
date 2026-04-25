@@ -78,7 +78,7 @@ export function Zone({ zone, searchQuery, zoom, heatmapMax, otherZones = [] }: P
   const bringToFront = useFloorPlan((s) => s.bringSelectedToFront);
   const sendToBack = useFloorPlan((s) => s.sendSelectedToBack);
   const floorLocked = useFloorPlan((s) => s.floors.find((f) => f.id === s.activeFloorId)?.locked ?? false);
-  const isLocked = zone.locked || floorLocked;
+  const isLocked = isLocked || floorLocked;
 
   const ref = useRef<HTMLDivElement>(null);
   const [drag, setDrag] = useState<DragState | null>(null);
@@ -197,7 +197,7 @@ export function Zone({ zone, searchQuery, zoom, heatmapMax, otherZones = [] }: P
   }, [rotateS, updateZone, zone.id]);
 
   const onHeaderMouseDown = (e: React.MouseEvent) => {
-    if (zone.locked) return;
+    if (isLocked) return;
     e.stopPropagation();
     const additive = e.shiftKey || e.metaKey || e.ctrlKey;
     // ensure selection includes this zone
@@ -253,7 +253,7 @@ export function Zone({ zone, searchQuery, zoom, heatmapMax, otherZones = [] }: P
   const rotation = zone.rotation ?? 0;
 
   // Cursor logic
-  const cursor = zone.locked
+  const cursor = isLocked
     ? "not-allowed"
     : drag
       ? "grabbing"
@@ -343,8 +343,8 @@ export function Zone({ zone, searchQuery, zoom, heatmapMax, otherZones = [] }: P
                 onMouseLeave={() => setHoverHandle(false)}
                 className={cn(
                   "px-3 py-1.5 flex items-center justify-between text-xs font-semibold select-none transition-colors",
-                  zone.locked ? "cursor-not-allowed" : "cursor-grab active:cursor-grabbing",
-                  hoverHandle && !zone.locked && "brightness-110"
+                  isLocked ? "cursor-not-allowed" : "cursor-grab active:cursor-grabbing",
+                  hoverHandle && !isLocked && "brightness-110"
                 )}
                 style={{
                   backgroundColor: !isSpace ? `hsl(${zone.color} / 0.15)` : undefined,
@@ -353,7 +353,7 @@ export function Zone({ zone, searchQuery, zoom, heatmapMax, otherZones = [] }: P
               >
                 <span className="flex items-center gap-1.5 truncate">
                   <GripHorizontal className="h-3 w-3 opacity-60 shrink-0" />
-                  {zone.locked && <Lock className="h-3 w-3" />}
+                  {isLocked && <Lock className="h-3 w-3" />}
                   {isSpace ? SPACE_LABELS[zone.spaceKind ?? "blank"] : zone.name}
                 </span>
                 {!isSpace && (
@@ -391,7 +391,7 @@ export function Zone({ zone, searchQuery, zoom, heatmapMax, otherZones = [] }: P
             </div>
 
             {/* Resize handle */}
-            {!zone.locked && selected && (
+            {!isLocked && selected && (
               <div
                 onMouseDown={(e) => {
                   e.stopPropagation();
@@ -404,7 +404,7 @@ export function Zone({ zone, searchQuery, zoom, heatmapMax, otherZones = [] }: P
             )}
 
             {/* Rotation handle */}
-            {!zone.locked && selected && (
+            {!isLocked && selected && (
               <div
                 onMouseDown={(e) => {
                   e.stopPropagation();
@@ -421,7 +421,7 @@ export function Zone({ zone, searchQuery, zoom, heatmapMax, otherZones = [] }: P
                 <RotateCw className="h-3 w-3" />
               </div>
             )}
-            {!zone.locked && selected && (
+            {!isLocked && selected && (
               <div
                 className="absolute -top-4 left-1/2 -translate-x-1/2 w-px h-4 bg-accent print:hidden pointer-events-none"
               />
