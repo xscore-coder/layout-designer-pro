@@ -172,14 +172,7 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
             size="sm"
             variant="outline"
             className="text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/40"
-            onClick={() => {
-              const f = floors.find((x) => x.id === activeFloorId);
-              if (!f) return;
-              if (confirm(`Clear all elements from "${f.name}"?`)) {
-                updateFloor(f.id, { zones: [] });
-                toast.success("Grid cleared");
-              }
-            }}
+            onClick={() => { setClearConfirmText(""); setClearOpen(true); }}
           >
             <Eraser className="h-4 w-4 mr-1" /> Clear Grid
           </Button>
