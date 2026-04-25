@@ -1,5 +1,5 @@
 export type ZoneShape = "rect" | "rounded" | "hex" | "oval" | "rhombus" | "parallelogram";
-export type SeatType = "empty" | "agent" | "leader" | "super" | "problem";
+export type SeatType = "empty" | "pc" | "problem";
 export type Shift = "morning" | "evening" | "night" | "off";
 export type SpaceKind = "corridor" | "office" | "storage" | "pillar" | "blank" | "group";
 
@@ -57,6 +57,8 @@ export interface Zone {
   rotation?: number; // degrees
   zIndex?: number;
   notes?: string;
+  /** Gap (px) between seats inside the zone grid */
+  seatGap?: number;
   seats: Seat[]; // length = rows*cols
   kind: "zone" | "space";
   spaceKind?: SpaceKind;
