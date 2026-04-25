@@ -56,6 +56,11 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
           e.preventDefault();
           duplicateZone(selectedZoneId);
         }
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "g") {
+        if (selectedZoneIds.length >= 1) {
+          e.preventDefault();
+          groupSelected();
+        }
       } else if (e.key === "Escape") {
         clearSelection();
       } else if (e.key === "Delete" || e.key === "Backspace") {
