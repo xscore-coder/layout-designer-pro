@@ -150,6 +150,7 @@ export function Inspector() {
                       المسافة بين كل خلية والتانية داخل الزون
                     </p>
                   </div>
+                  <div>
                     <Label>Notes</Label>
                     <Textarea
                       rows={2}
