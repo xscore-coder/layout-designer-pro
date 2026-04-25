@@ -259,6 +259,8 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
       <ReportDialog open={reportOpen} onOpenChange={setReportOpen} />
       <HistoryDrawer open={historyOpen} onOpenChange={setHistoryOpen} />
       <PrintDialog open={printOpen} onOpenChange={setPrintOpen} getStageEl={getStageEl} />
+      <VersionsDialog open={versionsOpen} onOpenChange={setVersionsOpen} />
+      <TemplatesDialog open={templatesOpen} onOpenChange={setTemplatesOpen} />
     </>
   );
 }
