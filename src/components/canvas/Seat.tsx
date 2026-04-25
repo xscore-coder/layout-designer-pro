@@ -45,7 +45,7 @@ export function Seat({ seat, zone, highlighted, heatmapMax }: Props) {
         if (e.shiftKey || e.metaKey) {
           select(seat.id);
         } else {
-          cycle(zone.id, seat.id);
+          if (!seat.locked) cycle(zone.id, seat.id);
           select(seat.id);
         }
       }}
@@ -54,13 +54,14 @@ export function Seat({ seat, zone, highlighted, heatmapMax }: Props) {
         e.stopPropagation();
         select(seat.id);
       }}
-      title={`PC ${seat.pcNumber}${seat.lockNumber ? ` • Lock ${seat.lockNumber}` : ""}${seat.problemCount ? ` • ${seat.problemCount} issue(s)` : ""}`}
+      title={`PC ${seat.pcNumber}${seat.lockNumber ? ` • Lock ${seat.lockNumber}` : ""}${seat.locked ? " • 🔒 Locked" : ""}${seat.problemCount ? ` • ${seat.problemCount} issue(s)` : ""}`}
       className={cn(
         "relative h-9 w-9 rounded-md flex items-center justify-center text-[10px] font-semibold transition-all",
         "hover:scale-110 hover:z-10 hover:shadow-md",
         TYPE_BG[seat.type] ?? TYPE_BG.empty,
         selected && "ring-2 ring-ring ring-offset-1 ring-offset-card",
-        highlighted && "ring-2 ring-warning"
+        highlighted && "ring-2 ring-warning",
+        seat.locked && "outline outline-1 outline-amber-400/70"
       )}
       style={heatStyle}
     >
@@ -68,6 +69,9 @@ export function Seat({ seat, zone, highlighted, heatmapMax }: Props) {
       <span className="absolute -bottom-3 text-[8px] text-foreground/70 font-mono">{seat.pcNumber}</span>
       {seat.lockNumber && (
         <span className="absolute -top-3 text-[8px] text-foreground/60 font-mono">🔒{seat.lockNumber}</span>
+      )}
+      {seat.locked && (
+        <span className="absolute -top-1 -right-1 text-[9px] leading-none">🔐</span>
       )}
     </button>
   );

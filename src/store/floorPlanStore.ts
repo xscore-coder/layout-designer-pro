@@ -456,7 +456,12 @@ export const useFloorPlan = create<Store>()(
                 if (z.id !== zoneId) return z;
                 return {
                   ...z,
-                  seats: z.seats.map((seat) => (seat.id === seatId ? { ...seat, ...patch } : seat)),
+                  seats: z.seats.map((seat) => {
+                    if (seat.id !== seatId) return seat;
+                    // When seat is locked, only allow toggling the `locked` flag itself.
+                    if (seat.locked && !("locked" in patch)) return seat;
+                    return { ...seat, ...patch };
+                  }),
                 };
               }),
             })),

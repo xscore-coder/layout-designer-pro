@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { ColorPicker } from "./ColorPicker";
 import {
-  Lock, Unlock, Copy, Trash2, Plus, AlertTriangle, Info, Ungroup,
+  Lock, Unlock, Copy, Trash2, Plus, AlertTriangle, Info, Ungroup, X, ShieldCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -215,92 +215,169 @@ export function Inspector() {
         </TabsContent>
 
         <TabsContent value="seat" className="flex-1 mt-0 overflow-hidden">
-          {seat && (
-            <ScrollArea className="h-full">
-              <div className="p-4 space-y-3">
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="font-mono">PC {seat.pcNumber}</Badge>
-                  <Badge>{seat.type}</Badge>
-                  {seat.problemCount > 0 && (
-                    <Badge variant="destructive" className="ml-auto">
-                      <AlertTriangle className="h-3 w-3 mr-1" /> {seat.problemCount}
-                    </Badge>
-                  )}
-                </div>
-
-                <div>
-                  <Label>PC Number</Label>
-                  <Input
-                    value={seat.pcNumber}
-                    onChange={(e) => updateSeat(zone.id, seat.id, { pcNumber: e.target.value })}
-                    placeholder="e.g. PC-101"
-                  />
-                </div>
-                <div>
-                  <Label>Lock Number</Label>
-                  <Input
-                    value={seat.lockNumber ?? ""}
-                    onChange={(e) => updateSeat(zone.id, seat.id, { lockNumber: e.target.value })}
-                    placeholder="e.g. LK-2034"
-                  />
-                </div>
-                <div>
-                  <Label>Note</Label>
-                  <Textarea
-                    rows={2}
-                    dir="auto"
-                    value={seat.note ?? ""}
-                    onChange={(e) => updateSeat(zone.id, seat.id, { note: e.target.value })}
-                    placeholder="ملاحظات…"
-                  />
-                </div>
-                <div>
-                  <Label>Wasla SCT Feedback</Label>
-                  <Textarea
-                    rows={2}
-                    dir="auto"
-                    value={seat.waslaSctFeedback ?? ""}
-                    onChange={(e) => updateSeat(zone.id, seat.id, { waslaSctFeedback: e.target.value })}
-                    placeholder="Wasla SCT feedback…"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 pt-2">
-                  <Button size="sm" variant="outline"
-                    onClick={() => addSeatHistory(zone.id, seat.id, "problem", "Reported issue")}>
-                    + Problem
-                  </Button>
-                  <Button size="sm" variant="outline"
-                    onClick={() => addSeatHistory(zone.id, seat.id, "fix", "Marked fixed")}>
-                    + Fix
-                  </Button>
-                </div>
-
-                <div>
-                  <Label className="text-xs uppercase tracking-wider text-muted-foreground">PC History</Label>
-                  <div className="mt-2 space-y-1 max-h-60 overflow-auto">
-                    {seat.history.length === 0 && (
-                      <p className="text-xs text-muted-foreground py-3 text-center">No history yet.</p>
+          {seat && (() => {
+            const seatLocked = !!seat.locked;
+            return (
+              <ScrollArea className="h-full">
+                <div className="p-4 space-y-3">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Badge variant="outline" className="font-mono">PC {seat.pcNumber}</Badge>
+                    <Badge>{seat.type}</Badge>
+                    {seat.problemCount > 0 && (
+                      <Badge variant="destructive">
+                        <AlertTriangle className="h-3 w-3 mr-1" /> {seat.problemCount}
+                      </Badge>
                     )}
-                    {seat.history.map((h) => (
-                      <div key={h.id} className="text-xs flex gap-2 border-l-2 pl-2 py-1"
-                        style={{
-                          borderColor:
-                            h.type === "problem" ? "hsl(var(--destructive))" :
-                            h.type === "fix" ? "hsl(var(--success))" :
-                            "hsl(var(--border))",
-                        }}>
-                        <span className="font-mono text-muted-foreground shrink-0">
-                          {new Date(h.date).toLocaleDateString()}
-                        </span>
-                        <span className="flex-1">{h.description}</span>
+                    {seatLocked && (
+                      <Badge variant="secondary" className="ml-auto gap-1">
+                        <Lock className="h-3 w-3" /> Locked
+                      </Badge>
+                    )}
+                  </div>
+
+                  {/* Lock toggle */}
+                  <div
+                    className={`rounded-md border p-2.5 flex items-center gap-2 ${
+                      seatLocked
+                        ? "bg-amber-500/10 border-amber-500/40"
+                        : "bg-emerald-500/10 border-emerald-500/40"
+                    }`}
+                  >
+                    <ShieldCheck className={`h-4 w-4 ${seatLocked ? "text-amber-600" : "text-emerald-600"}`} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold">
+                        {seatLocked ? "Cell Locked — fields are read-only" : "Cell Unlocked — editing enabled"}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground">
+                        {seatLocked
+                          ? "اضغط Unlock عشان تقدر تعدل البيانات"
+                          : "اقفل الخلية بعد التعديل عشان متتغيرش بالغلط"}
+                      </p>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant={seatLocked ? "default" : "outline"}
+                      onClick={() => {
+                        updateSeat(zone.id, seat.id, { locked: !seatLocked });
+                        toast.success(seatLocked ? "Cell unlocked" : "Cell locked");
+                      }}
+                    >
+                      {seatLocked ? (
+                        <><Unlock className="h-3 w-3 mr-1" /> Unlock</>
+                      ) : (
+                        <><Lock className="h-3 w-3 mr-1" /> Lock</>
+                      )}
+                    </Button>
+                  </div>
+
+                  <fieldset disabled={seatLocked} className="space-y-3 disabled:opacity-60">
+                    <div>
+                      <Label>PC Number</Label>
+                      <Input
+                        value={seat.pcNumber}
+                        onChange={(e) => updateSeat(zone.id, seat.id, { pcNumber: e.target.value })}
+                        placeholder="e.g. PC-101"
+                      />
+                    </div>
+                    <div>
+                      <Label>Lock Number</Label>
+                      <Input
+                        value={seat.lockNumber ?? ""}
+                        onChange={(e) => updateSeat(zone.id, seat.id, { lockNumber: e.target.value })}
+                        placeholder="e.g. LK-2034"
+                      />
+                    </div>
+
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <Label>Note</Label>
+                        {seat.note && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-6 px-2 text-xs text-muted-foreground hover:text-destructive"
+                            onClick={() => {
+                              updateSeat(zone.id, seat.id, { note: "" });
+                              toast.success("Note cleared");
+                            }}
+                          >
+                            <X className="h-3 w-3 mr-1" /> Clear
+                          </Button>
+                        )}
                       </div>
-                    ))}
+                      <Textarea
+                        rows={2}
+                        dir="auto"
+                        value={seat.note ?? ""}
+                        onChange={(e) => updateSeat(zone.id, seat.id, { note: e.target.value })}
+                        placeholder="ملاحظات…"
+                      />
+                    </div>
+
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <Label>Wasla SCT Feedback</Label>
+                        {seat.waslaSctFeedback && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-6 px-2 text-xs text-muted-foreground hover:text-destructive"
+                            onClick={() => {
+                              updateSeat(zone.id, seat.id, { waslaSctFeedback: "" });
+                              toast.success("Feedback cleared");
+                            }}
+                          >
+                            <X className="h-3 w-3 mr-1" /> Clear
+                          </Button>
+                        )}
+                      </div>
+                      <Textarea
+                        rows={2}
+                        dir="auto"
+                        value={seat.waslaSctFeedback ?? ""}
+                        onChange={(e) => updateSeat(zone.id, seat.id, { waslaSctFeedback: e.target.value })}
+                        placeholder="Wasla SCT feedback…"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 pt-2">
+                      <Button size="sm" variant="outline"
+                        onClick={() => addSeatHistory(zone.id, seat.id, "problem", "Reported issue")}>
+                        + Problem
+                      </Button>
+                      <Button size="sm" variant="outline"
+                        onClick={() => addSeatHistory(zone.id, seat.id, "fix", "Marked fixed")}>
+                        + Fix
+                      </Button>
+                    </div>
+                  </fieldset>
+
+                  <div>
+                    <Label className="text-xs uppercase tracking-wider text-muted-foreground">PC History</Label>
+                    <div className="mt-2 space-y-1 max-h-60 overflow-auto">
+                      {seat.history.length === 0 && (
+                        <p className="text-xs text-muted-foreground py-3 text-center">No history yet.</p>
+                      )}
+                      {seat.history.map((h) => (
+                        <div key={h.id} className="text-xs flex gap-2 border-l-2 pl-2 py-1"
+                          style={{
+                            borderColor:
+                              h.type === "problem" ? "hsl(var(--destructive))" :
+                              h.type === "fix" ? "hsl(var(--success))" :
+                              "hsl(var(--border))",
+                          }}>
+                          <span className="font-mono text-muted-foreground shrink-0">
+                            {new Date(h.date).toLocaleDateString()}
+                          </span>
+                          <span className="flex-1">{h.description}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </ScrollArea>
-          )}
+              </ScrollArea>
+            );
+          })()}
         </TabsContent>
       </Tabs>
     </div>

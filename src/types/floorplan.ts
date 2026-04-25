@@ -19,6 +19,8 @@ export interface Seat {
   waslaSctFeedback?: string;
   problemCount: number;
   history: PCHistoryEntry[];
+  /** When true, seat fields cannot be edited until unlocked */
+  locked?: boolean;
 }
 
 export interface ColorStyle {

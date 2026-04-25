@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 import { useFloorPlan } from "@/store/floorPlanStore";
 import {
@@ -20,6 +21,10 @@ import { ThemePicker } from "./ThemePicker";
 import { toast } from "sonner";
 import Papa from "papaparse";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import vodafoneLogo from "@/assets/vodafone-logo.png";
 
 interface Props {
@@ -38,6 +43,8 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
   const [versionsOpen, setVersionsOpen] = useState(false);
   const [templatesOpen, setTemplatesOpen] = useState(false);
   const [dashboardOpen, setDashboardOpen] = useState(false);
+  const [clearOpen, setClearOpen] = useState(false);
+  const [clearConfirmText, setClearConfirmText] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
   const jsonRef = useRef<HTMLInputElement>(null);
 
@@ -165,14 +172,7 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
             size="sm"
             variant="outline"
             className="text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/40"
-            onClick={() => {
-              const f = floors.find((x) => x.id === activeFloorId);
-              if (!f) return;
-              if (confirm(`Clear all elements from "${f.name}"?`)) {
-                updateFloor(f.id, { zones: [] });
-                toast.success("Grid cleared");
-              }
-            }}
+            onClick={() => { setClearConfirmText(""); setClearOpen(true); }}
           >
             <Eraser className="h-4 w-4 mr-1" /> Clear Grid
           </Button>
@@ -272,6 +272,84 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
       <VersionsDialog open={versionsOpen} onOpenChange={setVersionsOpen} />
       <TemplatesDialog open={templatesOpen} onOpenChange={setTemplatesOpen} />
       <DashboardDialog open={dashboardOpen} onOpenChange={setDashboardOpen} />
+
+      {/* Clear Grid confirmation */}
+      {(() => {
+        const f = floors.find((x) => x.id === activeFloorId);
+        const zoneCount = f ? f.zones.filter((z) => z.kind === "zone").length : 0;
+        const spaceCount = f ? f.zones.filter((z) => z.kind === "space").length : 0;
+        const seatCount = f
+          ? f.zones.reduce((a, z) => a + (z.kind === "zone" ? z.seats.length : 0), 0)
+          : 0;
+        const matches = !!f && clearConfirmText.trim() === f.name;
+        return (
+          <AlertDialog open={clearOpen} onOpenChange={setClearOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+                  <Trash2 className="h-5 w-5" /> Clear Grid — تأكيد نهائي
+                </AlertDialogTitle>
+                <AlertDialogDescription asChild>
+                  <div className="space-y-3">
+                    <p>
+                      أنت على وشك حذف <span className="font-semibold text-foreground">كل العناصر</span>{" "}
+                      من الـFloor التالي. هذا الإجراء لا يمكن التراجع عنه إلا عبر Undo.
+                    </p>
+
+                    <div className="rounded-md border border-border bg-muted/40 p-3 space-y-1.5">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Floor</span>
+                        <span className="font-semibold text-foreground">{f?.name ?? "—"}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Zones</span>
+                        <span className="font-mono text-foreground">{zoneCount}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Spaces</span>
+                        <span className="font-mono text-foreground">{spaceCount}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Total Seats</span>
+                        <span className="font-mono text-destructive font-semibold">{seatCount}</span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <p className="text-xs">
+                        لتأكيد الحذف، اكتب اسم الـFloor بالظبط:{" "}
+                        <span className="font-mono font-semibold text-foreground">{f?.name}</span>
+                      </p>
+                      <Input
+                        value={clearConfirmText}
+                        onChange={(e) => setClearConfirmText(e.target.value)}
+                        placeholder={f?.name ?? ""}
+                        className="font-mono"
+                        autoFocus
+                      />
+                    </div>
+                  </div>
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  disabled={!matches}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90 disabled:opacity-50"
+                  onClick={() => {
+                    if (!f || !matches) return;
+                    updateFloor(f.id, { zones: [] });
+                    toast.success(`Cleared "${f.name}"`);
+                    setClearConfirmText("");
+                  }}
+                >
+                  <Trash2 className="h-4 w-4 mr-1" /> Clear Grid
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        );
+      })()}
     </>
   );
 }
