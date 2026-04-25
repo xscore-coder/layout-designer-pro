@@ -2,8 +2,9 @@ import { useRef, useState, useEffect, forwardRef, useImperativeHandle } from "re
 import { useActiveFloor, useFloorPlan } from "@/store/floorPlanStore";
 import { Zone } from "./Zone";
 import { Button } from "@/components/ui/button";
-import { ZoomIn, ZoomOut, Maximize, Compass, Ruler } from "lucide-react";
+import { ZoomIn, ZoomOut, Maximize, Compass, Ruler, Lock } from "lucide-react";
 import { AlignmentToolbar } from "@/components/AlignmentToolbar";
+import { MiniMap } from "@/components/MiniMap";
 
 interface Props { searchQuery: string }
 
