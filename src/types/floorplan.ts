@@ -48,6 +48,8 @@ export interface Floor {
   zones: Zone[];
 }
 
+export type ThemePreset = "modern" | "blueprint" | "corporate" | "minimal" | "darkpro";
+
 export interface FloorPlanState {
   floors: Floor[];
   activeFloorId: string;
@@ -56,6 +58,12 @@ export interface FloorPlanState {
   darkMode: boolean;
   heatmap: boolean;
   zoom: number;
+  snapToGrid: boolean;
+  smartGuides: boolean;
+  showLegend: boolean;
+  showCompass: boolean;
+  showScale: boolean;
+  theme: ThemePreset;
 }
 
 export interface ChangeLogEntry {
