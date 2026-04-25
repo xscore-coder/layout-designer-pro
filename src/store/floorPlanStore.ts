@@ -184,14 +184,6 @@ export const useFloorPlan = create<Store>()(
             changeLog: log(s, "Added floor", f.name),
           });
         }),
-        set((s) => {
-          const f = defaultFloor(`Floor ${s.floors.length + 1}`);
-          return withHistory(s, {
-            floors: [...s.floors, f],
-            activeFloorId: f.id,
-            changeLog: log(s, "Added floor", f.name),
-          });
-        }),
 
       removeFloor: (id) =>
         set((s) => {
