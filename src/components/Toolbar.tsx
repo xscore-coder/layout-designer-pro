@@ -1,11 +1,11 @@
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+
 import { useFloorPlan } from "@/store/floorPlanStore";
 import {
-  Plus, Square, Combine, History, FileBarChart, Search, Download,
+  Plus, Square, Combine, History, FileBarChart, Download,
   Upload, Undo2, Redo2, Moon, Sun, Flame, LayoutGrid, Trash2, FileSpreadsheet, Printer, ShieldAlert,
-  Group, LayoutTemplate, Save, LayoutDashboard,
+  Group, LayoutTemplate, Save, LayoutDashboard, Eraser,
 } from "lucide-react";
 import { AddZoneDialog } from "./dialogs/AddZoneDialog";
 import { AddSpaceDialog } from "./dialogs/AddSpaceDialog";
@@ -56,6 +56,8 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
   const groupSelected = useFloorPlan((s) => s.groupSelectedAsSpace);
   const selectedZoneIds = useFloorPlan((s) => s.selectedZoneIds);
   const saveVersion = useFloorPlan((s) => s.saveVersion);
+  const activeFloorId = useFloorPlan((s) => s.activeFloorId);
+  const updateFloor = useFloorPlan((s) => s.updateFloor);
 
   const exportJSON = () => {
     const blob = new Blob([JSON.stringify({ floors }, null, 2)], { type: "application/json" });
@@ -158,15 +160,24 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
 
         <div className="h-6 w-px bg-border mx-1" />
 
-        <div className="relative w-44 hidden md:block">
-          <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-          <Input
-            value={search}
-            onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Search PC / agent…"
-            className="h-8 pl-7 text-xs"
-          />
-        </div>
+        <Tooltip><TooltipTrigger asChild>
+          <Button
+            size="sm"
+            variant="outline"
+            className="text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/40"
+            onClick={() => {
+              const f = floors.find((x) => x.id === activeFloorId);
+              if (!f) return;
+              if (confirm(`Clear all elements from "${f.name}"?`)) {
+                updateFloor(f.id, { zones: [] });
+                toast.success("Grid cleared");
+              }
+            }}
+          >
+            <Eraser className="h-4 w-4 mr-1" /> Clear Grid
+          </Button>
+        </TooltipTrigger><TooltipContent>Remove all zones & spaces from the active floor</TooltipContent></Tooltip>
+
 
         <div className="ml-auto flex items-center gap-1">
           <Tooltip><TooltipTrigger asChild>
