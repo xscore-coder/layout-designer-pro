@@ -561,6 +561,12 @@ export const useFloorPlan = create<Store>()(
         activeFloorId: s.activeFloorId,
         darkMode: s.darkMode,
         changeLog: s.changeLog,
+        snapToGrid: s.snapToGrid,
+        smartGuides: s.smartGuides,
+        showLegend: s.showLegend,
+        showCompass: s.showCompass,
+        showScale: s.showScale,
+        theme: s.theme,
       }),
       onRehydrateStorage: () => (state) => {
         if (state?.darkMode) document.documentElement.classList.add("dark");
