@@ -1,7 +1,7 @@
 import { useFloorPlan } from "@/store/floorPlanStore";
 import type { Seat as SeatT, Zone } from "@/types/floorplan";
 import { cn } from "@/lib/utils";
-import { Monitor, User, Crown, ShieldCheck, AlertTriangle } from "lucide-react";
+import { Monitor, AlertTriangle, MinusCircle } from "lucide-react";
 
 interface Props {
   seat: SeatT;
@@ -11,18 +11,14 @@ interface Props {
 }
 
 const ICONS = {
-  empty: Monitor,
-  agent: User,
-  leader: Crown,
-  super: ShieldCheck,
+  empty: MinusCircle,
+  pc: Monitor,
   problem: AlertTriangle,
 } as const;
 
 const TYPE_BG: Record<string, string> = {
   empty: "bg-seat-empty text-muted-foreground",
-  agent: "bg-seat-agent text-white",
-  leader: "bg-seat-leader text-white",
-  super: "bg-seat-super text-white",
+  pc: "bg-seat-agent text-white",
   problem: "bg-seat-problem text-white",
 };
 

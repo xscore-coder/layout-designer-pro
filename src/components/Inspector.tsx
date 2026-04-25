@@ -9,6 +9,7 @@ import type { ZoneShape, Shift } from "@/types/floorplan";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import { Slider } from "@/components/ui/slider";
 import { ColorPicker } from "./ColorPicker";
 import {
   Lock, Unlock, Copy, Trash2, Plus, AlertTriangle, Info, Ungroup,
@@ -129,6 +130,25 @@ export function Inspector() {
                         {ALL_SHAPES.map((s) => <SelectItem key={s} value={s}>{shapeLabel(s)}</SelectItem>)}
                       </SelectContent>
                     </Select>
+                  </div>
+
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <Label>Seat spacing</Label>
+                      <span className="text-xs font-mono text-muted-foreground">
+                        {zone.seatGap ?? 8}px
+                      </span>
+                    </div>
+                    <Slider
+                      min={0}
+                      max={32}
+                      step={1}
+                      value={[zone.seatGap ?? 8]}
+                      onValueChange={(v) => updateZone(zone.id, { seatGap: v[0] })}
+                    />
+                    <p className="text-[10px] text-muted-foreground mt-1">
+                      المسافة بين كل خلية والتانية داخل الزون
+                    </p>
                   </div>
                   <div>
                     <Label>Notes</Label>

@@ -5,7 +5,7 @@ import { useFloorPlan } from "@/store/floorPlanStore";
 import {
   Plus, Square, Combine, History, FileBarChart, Search, Download,
   Upload, Undo2, Redo2, Moon, Sun, Flame, LayoutGrid, Trash2, FileSpreadsheet, Printer, ShieldAlert,
-  Group, LayoutTemplate, Save, Map as MapIcon,
+  Group, LayoutTemplate, Save,
 } from "lucide-react";
 import { AddZoneDialog } from "./dialogs/AddZoneDialog";
 import { AddSpaceDialog } from "./dialogs/AddSpaceDialog";
@@ -46,8 +46,6 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
   const toggleHeatmap = useFloorPlan((s) => s.toggleHeatmap);
   const collisionDetection = useFloorPlan((s) => s.collisionDetection);
   const toggleCollision = useFloorPlan((s) => s.toggleCollision);
-  const showMiniMap = useFloorPlan((s) => s.showMiniMap);
-  const toggleMiniMap = useFloorPlan((s) => s.toggleMiniMap);
   const importPCs = useFloorPlan((s) => s.importPCs);
   const reset = useFloorPlan((s) => s.reset);
   const floors = useFloorPlan((s) => s.floors);
@@ -179,12 +177,6 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
               <ShieldAlert className="h-4 w-4" />
             </Button>
           </TooltipTrigger><TooltipContent>Collision detection</TooltipContent></Tooltip>
-
-          <Tooltip><TooltipTrigger asChild>
-            <Button size="icon" variant={showMiniMap ? "default" : "ghost"} onClick={toggleMiniMap}>
-              <MapIcon className="h-4 w-4" />
-            </Button>
-          </TooltipTrigger><TooltipContent>Mini-Map</TooltipContent></Tooltip>
 
           <Tooltip><TooltipTrigger asChild>
             <Button size="icon" variant="ghost" onClick={() => { saveVersion(); toast.success("Snapshot saved"); }}>

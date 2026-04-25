@@ -385,9 +385,10 @@ export function Zone({ zone, searchQuery, zoom, heatmapMax, otherZones = [] }: P
               ) : (
                 <div className="p-3 pb-5">
                   <div
-                    className="grid gap-2 mx-auto"
+                    className="grid mx-auto"
                     style={{
                       gridTemplateColumns: `repeat(${zone.cols}, minmax(0, 1fr))`,
+                      gap: `${zone.seatGap ?? 8}px`,
                       width: "fit-content",
                     }}
                   >

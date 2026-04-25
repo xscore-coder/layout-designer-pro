@@ -34,7 +34,7 @@ function makeSeats(rows: number, cols: number, startPc: number): Seat[] {
     seats.push({
       id: uid(),
       pcNumber: String(startPc + i),
-      type: "agent",
+      type: "pc",
       problemCount: 0,
       history: [],
     });
@@ -420,7 +420,7 @@ export const useFloorPlan = create<Store>()(
         ),
 
       cycleSeatType: (zoneId, seatId) => {
-        const order: SeatType[] = ["agent", "leader", "super", "empty", "problem"];
+        const order: SeatType[] = ["pc", "problem", "empty"];
         set((s) =>
           withHistory(s, {
             floors: updateActiveFloor(s, (f) => ({
