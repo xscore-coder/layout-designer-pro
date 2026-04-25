@@ -33,6 +33,8 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
   const [reportOpen, setReportOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [printOpen, setPrintOpen] = useState(false);
+  const [versionsOpen, setVersionsOpen] = useState(false);
+  const [templatesOpen, setTemplatesOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const jsonRef = useRef<HTMLInputElement>(null);
 
@@ -44,10 +46,15 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
   const toggleHeatmap = useFloorPlan((s) => s.toggleHeatmap);
   const collisionDetection = useFloorPlan((s) => s.collisionDetection);
   const toggleCollision = useFloorPlan((s) => s.toggleCollision);
+  const showMiniMap = useFloorPlan((s) => s.showMiniMap);
+  const toggleMiniMap = useFloorPlan((s) => s.toggleMiniMap);
   const importPCs = useFloorPlan((s) => s.importPCs);
   const reset = useFloorPlan((s) => s.reset);
   const floors = useFloorPlan((s) => s.floors);
   const loadJSON = useFloorPlan((s) => s.loadFromJSON);
+  const groupSelected = useFloorPlan((s) => s.groupSelectedAsSpace);
+  const selectedZoneIds = useFloorPlan((s) => s.selectedZoneIds);
+  const saveVersion = useFloorPlan((s) => s.saveVersion);
 
   const exportJSON = () => {
     const blob = new Blob([JSON.stringify({ floors }, null, 2)], { type: "application/json" });
