@@ -37,6 +37,7 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
   const [printOpen, setPrintOpen] = useState(false);
   const [versionsOpen, setVersionsOpen] = useState(false);
   const [templatesOpen, setTemplatesOpen] = useState(false);
+  const [dashboardOpen, setDashboardOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const jsonRef = useRef<HTMLInputElement>(null);
 
@@ -192,6 +193,10 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
             </Button>
           </TooltipTrigger><TooltipContent>Versions</TooltipContent></Tooltip>
 
+          <Button size="sm" variant="ghost" onClick={() => setDashboardOpen(true)}>
+            <LayoutDashboard className="h-4 w-4 mr-1" /> Dashboard
+          </Button>
+
           <Button size="sm" variant="ghost" onClick={() => setReportOpen(true)}>
             <FileBarChart className="h-4 w-4 mr-1" /> Report
           </Button>
@@ -255,6 +260,7 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
       <PrintDialog open={printOpen} onOpenChange={setPrintOpen} getStageEl={getStageEl} />
       <VersionsDialog open={versionsOpen} onOpenChange={setVersionsOpen} />
       <TemplatesDialog open={templatesOpen} onOpenChange={setTemplatesOpen} />
+      <DashboardDialog open={dashboardOpen} onOpenChange={setDashboardOpen} />
     </>
   );
 }
