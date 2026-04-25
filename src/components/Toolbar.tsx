@@ -162,6 +162,14 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
           </Button>
 
           <Tooltip><TooltipTrigger asChild>
+            <Button size="icon" variant="default" className="bg-gradient-primary text-primary-foreground" onClick={() => setPrintOpen(true)}>
+              <Printer className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger><TooltipContent>Print / Export PDF</TooltipContent></Tooltip>
+
+          <ThemePicker />
+
+          <Tooltip><TooltipTrigger asChild>
             <Button size="icon" variant="ghost" onClick={() => fileRef.current?.click()}>
               <Upload className="h-4 w-4" />
             </Button>
