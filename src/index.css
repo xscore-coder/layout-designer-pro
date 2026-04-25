@@ -164,6 +164,32 @@
     background-size: 20px 20px;
   }
 
+  /* Theme presets — affect canvas backdrop only */
+  .theme-blueprint {
+    background-color: hsl(215 60% 22%);
+    background-image:
+      linear-gradient(hsl(210 100% 75% / 0.18) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(210 100% 75% / 0.18) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+  .theme-corporate {
+    background-color: hsl(220 14% 96%);
+    background-image:
+      radial-gradient(hsl(220 13% 80%) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+  .theme-minimal {
+    background-color: hsl(0 0% 100%);
+    background-image: none;
+  }
+  .theme-darkpro {
+    background-color: hsl(222 47% 6%);
+    background-image:
+      linear-gradient(hsl(217 33% 18%) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(217 33% 18%) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
   .scrollbar-thin::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -179,3 +205,9 @@
     background: hsl(var(--muted-foreground) / 0.4);
   }
 }
+
+@media print {
+  body { background: white !important; }
+  .print\:hidden { display: none !important; }
+}
+
