@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { ColorPicker } from "./ColorPicker";
 import {
-  Lock, Unlock, Copy, Trash2, Plus, AlertTriangle, Info, Ungroup,
+  Lock, Unlock, Copy, Trash2, Plus, AlertTriangle, Info, Ungroup, X, ShieldCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 
