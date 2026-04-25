@@ -289,6 +289,10 @@ export const useFloorPlan = create<Store>()(
             floors: updateActiveFloor(s, (f) => ({
               ...f,
               zones: f.zones.map((z) => {
+                // child of moving group
+                if (movingGroup && z.parentId === id && !z.locked) {
+                  return { ...z, x: Math.max(0, z.x + dx), y: Math.max(0, z.y + dy) };
+                }
                 if (z.id !== id) return z;
                 if (z.locked && !("locked" in patch)) return z;
                 let next = { ...z, ...snapped };
