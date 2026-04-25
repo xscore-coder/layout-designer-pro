@@ -28,6 +28,7 @@ export function Inspector() {
   const appendSeats = useFloorPlan((s) => s.appendSeats);
   const updateSeat = useFloorPlan((s) => s.updateSeat);
   const addSeatHistory = useFloorPlan((s) => s.addSeatHistory);
+  const ungroupSpace = useFloorPlan((s) => s.ungroupSpace);
 
   const zone = floor.zones.find((z) => z.id === selectedZoneId);
   const seat = zone?.seats.find((s) => s.id === selectedSeatId);
