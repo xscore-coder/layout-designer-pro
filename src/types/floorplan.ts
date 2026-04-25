@@ -14,10 +14,8 @@ export interface Seat {
   id: string;
   pcNumber: string;
   type: SeatType;
-  agentName?: string;
-  shift?: Shift;
-  team?: string;
   note?: string;
+  waslaSctFeedback?: string;
   problemCount: number;
   history: PCHistoryEntry[];
 }
