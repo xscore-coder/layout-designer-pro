@@ -118,7 +118,7 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
       <div className="h-14 border-b border-border bg-card/80 backdrop-blur flex items-center gap-1 px-3 shrink-0 z-10">
         <div className="flex items-center gap-2 mr-3">
           <div className="h-7 w-7 rounded-lg bg-gradient-primary shadow-glow" />
-          <h1 className="font-bold text-sm hidden md:block">FloorForge</h1>
+          <h1 className="font-bold text-sm hidden md:block">Vodafone Floor</h1>
         </div>
 
         <div className="h-6 w-px bg-border mx-1" />
