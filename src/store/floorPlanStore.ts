@@ -61,6 +61,25 @@ interface Store extends FloorPlanState {
   removeFloor: (id: string) => void;
   renameFloor: (id: string, name: string) => void;
   setActiveFloor: (id: string) => void;
+  toggleFloorLock: (id: string) => void;
+  updateFloor: (id: string, patch: Partial<Floor>) => void;
+
+  // grouping
+  groupSelectedAsSpace: () => void;
+  ungroupSpace: (spaceId: string) => void;
+
+  // versions
+  saveVersion: (label?: string) => void;
+  restoreVersion: (id: string) => void;
+  removeVersion: (id: string) => void;
+
+  // palette
+  addPaletteColor: (hsl: string) => void;
+  removePaletteColor: (hsl: string) => void;
+
+  // visibility
+  toggleZoneVisibility: (id: string) => void;
+  toggleMiniMap: () => void;
 
   // zone ops
   addZone: (input: Partial<Zone> & { name: string; rows: number; cols: number }) => void;
@@ -147,8 +166,11 @@ export const useFloorPlan = create<Store>()(
       showLegend: true,
       showCompass: true,
       showScale: true,
+      showMiniMap: true,
       collisionDetection: false,
       theme: "modern",
+      customPalette: [],
+      versions: [],
       past: [],
       future: [],
       changeLog: [],
@@ -242,6 +264,9 @@ export const useFloorPlan = create<Store>()(
 
       updateZone: (id, patch) =>
         set((s) => {
+          // floor-level lock blocks all edits
+          const af = activeFloor(s);
+          if (af?.locked) return {};
           const snap = s.snapToGrid;
           const snapped: Partial<Zone> = { ...patch };
           if (snap) {
@@ -250,10 +275,24 @@ export const useFloorPlan = create<Store>()(
             if (typeof snapped.width === "number") snapped.width = snapVal(snapped.width, true);
             if (typeof snapped.height === "number") snapped.height = snapVal(snapped.height, true);
           }
+          // If moving a group container, move its children together
+          const movingGroup =
+            (typeof patch.x === "number" || typeof patch.y === "number") &&
+            af?.zones.find((z) => z.id === id)?.spaceKind === "group";
+          let dx = 0, dy = 0;
+          if (movingGroup) {
+            const orig = af!.zones.find((z) => z.id === id)!;
+            dx = (snapped.x ?? orig.x) - orig.x;
+            dy = (snapped.y ?? orig.y) - orig.y;
+          }
           return withHistory(s, {
             floors: updateActiveFloor(s, (f) => ({
               ...f,
               zones: f.zones.map((z) => {
+                // child of moving group
+                if (movingGroup && z.parentId === id && !z.locked) {
+                  return { ...z, x: Math.max(0, z.x + dx), y: Math.max(0, z.y + dy) };
+                }
                 if (z.id !== id) return z;
                 if (z.locked && !("locked" in patch)) return z;
                 let next = { ...z, ...snapped };
@@ -689,6 +728,124 @@ export const useFloorPlan = create<Store>()(
             changeLog: log(s, "Loaded JSON"),
           })
         ),
+
+      // ===== Floor Lock + Floor properties =====
+      toggleFloorLock: (id) =>
+        set((s) =>
+          withHistory(s, {
+            floors: s.floors.map((f) => (f.id === id ? { ...f, locked: !f.locked } : f)),
+            changeLog: log(s, "Toggled floor lock"),
+          })
+        ),
+
+      updateFloor: (id, patch) =>
+        set((s) =>
+          withHistory(s, {
+            floors: s.floors.map((f) => (f.id === id ? { ...f, ...patch } : f)),
+            changeLog: log(s, "Updated floor"),
+          })
+        ),
+
+      // ===== Group selected zones into a Space container =====
+      groupSelectedAsSpace: () =>
+        set((s) => {
+          const f = activeFloor(s);
+          if (!f || s.selectedZoneIds.length < 1) return {};
+          const sel = f.zones.filter((z) => s.selectedZoneIds.includes(z.id));
+          if (!sel.length) return {};
+          const PAD = 24;
+          const minX = Math.min(...sel.map((z) => z.x)) - PAD;
+          const minY = Math.min(...sel.map((z) => z.y)) - PAD - 10;
+          const maxX = Math.max(...sel.map((z) => z.x + z.width)) + PAD;
+          const maxY = Math.max(...sel.map((z) => z.y + z.height)) + PAD;
+          const groupId = uid();
+          const container: Zone = {
+            id: groupId,
+            name: "Group",
+            shape: "rect",
+            rows: 0, cols: 0, startPc: 0,
+            color: "215 16% 65%",
+            x: minX, y: minY,
+            width: maxX - minX,
+            height: maxY - minY,
+            locked: false,
+            seats: [],
+            kind: "space",
+            spaceKind: "group",
+          };
+          return withHistory(s, {
+            floors: updateActiveFloor(s, (fl) => {
+              // place group BEHIND its children
+              const others = fl.zones.filter((z) => !sel.find((x) => x.id === z.id));
+              const childrenWithParent = sel.map((z) => ({ ...z, parentId: groupId }));
+              return { ...fl, zones: [...others, container, ...childrenWithParent] };
+            }),
+            selectedZoneId: groupId,
+            selectedZoneIds: [groupId],
+            changeLog: log(s, "Grouped into space"),
+          });
+        }),
+
+      ungroupSpace: (spaceId) =>
+        set((s) =>
+          withHistory(s, {
+            floors: updateActiveFloor(s, (f) => ({
+              ...f,
+              zones: f.zones
+                .filter((z) => z.id !== spaceId)
+                .map((z) => (z.parentId === spaceId ? { ...z, parentId: undefined } : z)),
+            })),
+            selectedZoneId: null,
+            selectedZoneIds: [],
+            changeLog: log(s, "Ungrouped space"),
+          })
+        ),
+
+      // ===== Versions (autosave / manual) =====
+      saveVersion: (label) =>
+        set((s) => ({
+          versions: [
+            {
+              id: uid(),
+              date: new Date().toISOString(),
+              label: label ?? `Snapshot ${new Date().toLocaleTimeString()}`,
+              data: { floors: JSON.parse(JSON.stringify(s.floors)) },
+            },
+            ...s.versions,
+          ].slice(0, 30),
+          changeLog: log(s, "Saved version", label),
+        })),
+
+      restoreVersion: (id) =>
+        set((s) => {
+          const v = s.versions.find((x) => x.id === id);
+          if (!v) return {};
+          return withHistory(s, {
+            floors: JSON.parse(JSON.stringify(v.data.floors)),
+            changeLog: log(s, "Restored version", v.label),
+          });
+        }),
+
+      removeVersion: (id) =>
+        set((s) => ({ versions: s.versions.filter((v) => v.id !== id) })),
+
+      // ===== Custom Palette =====
+      addPaletteColor: (hsl) =>
+        set((s) => ({
+          customPalette: s.customPalette.includes(hsl) ? s.customPalette : [hsl, ...s.customPalette].slice(0, 24),
+        })),
+      removePaletteColor: (hsl) =>
+        set((s) => ({ customPalette: s.customPalette.filter((c) => c !== hsl) })),
+
+      // ===== Visibility =====
+      toggleZoneVisibility: (id) =>
+        set((s) => ({
+          floors: updateActiveFloor(s, (f) => ({
+            ...f,
+            zones: f.zones.map((z) => (z.id === id ? { ...z, hidden: !z.hidden } : z)),
+          })),
+        })),
+      toggleMiniMap: () => set((s) => ({ showMiniMap: !s.showMiniMap })),
     }),
     {
       name: "floorplan-v1",
@@ -702,8 +859,11 @@ export const useFloorPlan = create<Store>()(
         showLegend: s.showLegend,
         showCompass: s.showCompass,
         showScale: s.showScale,
+        showMiniMap: s.showMiniMap,
         collisionDetection: s.collisionDetection,
         theme: s.theme,
+        customPalette: s.customPalette,
+        versions: s.versions,
       }),
       onRehydrateStorage: () => (state) => {
         if (state?.darkMode) document.documentElement.classList.add("dark");

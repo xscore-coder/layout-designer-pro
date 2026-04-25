@@ -2,8 +2,9 @@ import { useRef, useState, useEffect, forwardRef, useImperativeHandle } from "re
 import { useActiveFloor, useFloorPlan } from "@/store/floorPlanStore";
 import { Zone } from "./Zone";
 import { Button } from "@/components/ui/button";
-import { ZoomIn, ZoomOut, Maximize, Compass, Ruler } from "lucide-react";
+import { ZoomIn, ZoomOut, Maximize, Compass, Ruler, Lock } from "lucide-react";
 import { AlignmentToolbar } from "@/components/AlignmentToolbar";
+import { MiniMap } from "@/components/MiniMap";
 
 interface Props { searchQuery: string }
 
@@ -29,6 +30,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
   const showScale = useFloorPlan((s) => s.showScale);
   const showLegend = useFloorPlan((s) => s.showLegend);
   const theme = useFloorPlan((s) => s.theme);
+  const groupSelected = useFloorPlan((s) => s.groupSelectedAsSpace);
   const containerRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
@@ -54,6 +56,11 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
           e.preventDefault();
           duplicateZone(selectedZoneId);
         }
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "g") {
+        if (selectedZoneIds.length >= 1) {
+          e.preventDefault();
+          groupSelected();
+        }
       } else if (e.key === "Escape") {
         clearSelection();
       } else if (e.key === "Delete" || e.key === "Backspace") {
@@ -72,7 +79,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [undo, redo, selectedZoneId, selectedZoneIds, removeZone, moveSelectedBy, clearSelection, duplicateZone]);
+  }, [undo, redo, selectedZoneId, selectedZoneIds, removeZone, moveSelectedBy, clearSelection, duplicateZone, groupSelected]);
 
   useEffect(() => {
     if (!pan) return;
@@ -108,6 +115,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
     <div
       ref={containerRef}
       className={`relative flex-1 overflow-hidden ${themeBg[theme] ?? "canvas-grid-bg"}`}
+      style={floor.bgColor ? { backgroundColor: `hsl(${floor.bgColor})` } : undefined}
       onMouseDown={(e) => {
         if (e.button === 1 || (e.button === 0 && e.altKey)) {
           e.preventDefault();
@@ -157,6 +165,17 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
       {showLegend && <LegendCard />}
       {showCompass && <NorthArrow />}
       {showScale && <ScaleBar zoom={zoom} />}
+
+      {/* Mini-Map navigator */}
+      <MiniMap />
+
+      {/* Floor lock badge */}
+      {floor.locked && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-warning/95 text-warning-foreground rounded-full px-3 py-1.5 shadow-lg flex items-center gap-2 text-xs font-semibold print:hidden z-30">
+          <Lock className="h-3.5 w-3.5" />
+          Floor Locked — All edits disabled
+        </div>
+      )}
 
       {/* Zoom controls */}
       <div className="absolute bottom-4 right-4 flex flex-col gap-1 bg-card/90 backdrop-blur rounded-lg shadow-md border border-border p-1 print:hidden">

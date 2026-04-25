@@ -5,6 +5,7 @@ import { useFloorPlan } from "@/store/floorPlanStore";
 import {
   Plus, Square, Combine, History, FileBarChart, Search, Download,
   Upload, Undo2, Redo2, Moon, Sun, Flame, LayoutGrid, Trash2, FileSpreadsheet, Printer, ShieldAlert,
+  Group, LayoutTemplate, Save, Map as MapIcon,
 } from "lucide-react";
 import { AddZoneDialog } from "./dialogs/AddZoneDialog";
 import { AddSpaceDialog } from "./dialogs/AddSpaceDialog";
@@ -12,6 +13,8 @@ import { MergeZonesDialog } from "./dialogs/MergeZonesDialog";
 import { ReportDialog } from "./dialogs/ReportDialog";
 import { HistoryDrawer } from "./dialogs/HistoryDrawer";
 import { PrintDialog } from "./dialogs/PrintDialog";
+import { VersionsDialog } from "./dialogs/VersionsDialog";
+import { TemplatesDialog } from "./dialogs/TemplatesDialog";
 import { ThemePicker } from "./ThemePicker";
 import { toast } from "sonner";
 import Papa from "papaparse";
@@ -30,6 +33,8 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
   const [reportOpen, setReportOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [printOpen, setPrintOpen] = useState(false);
+  const [versionsOpen, setVersionsOpen] = useState(false);
+  const [templatesOpen, setTemplatesOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const jsonRef = useRef<HTMLInputElement>(null);
 
@@ -41,10 +46,15 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
   const toggleHeatmap = useFloorPlan((s) => s.toggleHeatmap);
   const collisionDetection = useFloorPlan((s) => s.collisionDetection);
   const toggleCollision = useFloorPlan((s) => s.toggleCollision);
+  const showMiniMap = useFloorPlan((s) => s.showMiniMap);
+  const toggleMiniMap = useFloorPlan((s) => s.toggleMiniMap);
   const importPCs = useFloorPlan((s) => s.importPCs);
   const reset = useFloorPlan((s) => s.reset);
   const floors = useFloorPlan((s) => s.floors);
   const loadJSON = useFloorPlan((s) => s.loadFromJSON);
+  const groupSelected = useFloorPlan((s) => s.groupSelectedAsSpace);
+  const selectedZoneIds = useFloorPlan((s) => s.selectedZoneIds);
+  const saveVersion = useFloorPlan((s) => s.saveVersion);
 
   const exportJSON = () => {
     const blob = new Blob([JSON.stringify({ floors }, null, 2)], { type: "application/json" });
@@ -124,6 +134,17 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
         <Button size="sm" variant="outline" onClick={() => setMergeOpen(true)}>
           <Combine className="h-4 w-4 mr-1" /> Merge
         </Button>
+        <Tooltip><TooltipTrigger asChild>
+          <Button size="sm" variant="outline" disabled={selectedZoneIds.length < 1}
+            onClick={() => { groupSelected(); toast.success("Grouped"); }}>
+            <Group className="h-4 w-4 mr-1" /> Group
+          </Button>
+        </TooltipTrigger><TooltipContent>Group selected into a Space</TooltipContent></Tooltip>
+        <Tooltip><TooltipTrigger asChild>
+          <Button size="sm" variant="outline" onClick={() => setTemplatesOpen(true)}>
+            <LayoutTemplate className="h-4 w-4 mr-1" /> Templates
+          </Button>
+        </TooltipTrigger><TooltipContent>Insert pre-built layout</TooltipContent></Tooltip>
 
         <div className="h-6 w-px bg-border mx-1" />
 
@@ -160,10 +181,22 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
           </TooltipTrigger><TooltipContent>Collision detection</TooltipContent></Tooltip>
 
           <Tooltip><TooltipTrigger asChild>
-            <Button size="icon" variant="ghost" onClick={() => setHistoryOpen(true)}>
+            <Button size="icon" variant={showMiniMap ? "default" : "ghost"} onClick={toggleMiniMap}>
+              <MapIcon className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger><TooltipContent>Mini-Map</TooltipContent></Tooltip>
+
+          <Tooltip><TooltipTrigger asChild>
+            <Button size="icon" variant="ghost" onClick={() => { saveVersion(); toast.success("Snapshot saved"); }}>
+              <Save className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger><TooltipContent>Save snapshot</TooltipContent></Tooltip>
+
+          <Tooltip><TooltipTrigger asChild>
+            <Button size="icon" variant="ghost" onClick={() => setVersionsOpen(true)}>
               <History className="h-4 w-4" />
             </Button>
-          </TooltipTrigger><TooltipContent>Change history</TooltipContent></Tooltip>
+          </TooltipTrigger><TooltipContent>Versions</TooltipContent></Tooltip>
 
           <Button size="sm" variant="ghost" onClick={() => setReportOpen(true)}>
             <FileBarChart className="h-4 w-4 mr-1" /> Report
@@ -226,6 +259,8 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
       <ReportDialog open={reportOpen} onOpenChange={setReportOpen} />
       <HistoryDrawer open={historyOpen} onOpenChange={setHistoryOpen} />
       <PrintDialog open={printOpen} onOpenChange={setPrintOpen} getStageEl={getStageEl} />
+      <VersionsDialog open={versionsOpen} onOpenChange={setVersionsOpen} />
+      <TemplatesDialog open={templatesOpen} onOpenChange={setTemplatesOpen} />
     </>
   );
 }

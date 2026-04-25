@@ -1,12 +1,23 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Toolbar } from "@/components/Toolbar";
 import { Canvas, type CanvasHandle } from "@/components/canvas/Canvas";
 import { Inspector } from "@/components/Inspector";
 import { FloorList, ZoneList } from "@/components/SidePanels";
+import { LayersPanel } from "@/components/LayersPanel";
+import { useFloorPlan } from "@/store/floorPlanStore";
 
 const Index = () => {
   const [search, setSearch] = useState("");
   const canvasRef = useRef<CanvasHandle>(null);
+  const saveVersion = useFloorPlan((s) => s.saveVersion);
+
+  // Auto-save snapshot every 60s
+  useEffect(() => {
+    const t = setInterval(() => {
+      saveVersion(`Auto-save ${new Date().toLocaleTimeString()}`);
+    }, 60_000);
+    return () => clearInterval(t);
+  }, [saveVersion]);
 
   return (
     <div className="h-screen w-screen flex flex-col bg-background overflow-hidden">
@@ -19,6 +30,7 @@ const Index = () => {
         <aside className="w-64 border-r border-border bg-card flex flex-col shrink-0 print:hidden">
           <FloorList />
           <ZoneList />
+          <LayersPanel />
         </aside>
 
         <Canvas ref={canvasRef} searchQuery={search} />

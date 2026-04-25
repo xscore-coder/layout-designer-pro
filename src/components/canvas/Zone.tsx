@@ -77,6 +77,8 @@ export function Zone({ zone, searchQuery, zoom, heatmapMax, otherZones = [] }: P
   const toggleLock = useFloorPlan((s) => s.toggleLock);
   const bringToFront = useFloorPlan((s) => s.bringSelectedToFront);
   const sendToBack = useFloorPlan((s) => s.sendSelectedToBack);
+  const floorLocked = useFloorPlan((s) => s.floors.find((f) => f.id === s.activeFloorId)?.locked ?? false);
+  const isLocked = zone.locked || floorLocked;
 
   const ref = useRef<HTMLDivElement>(null);
   const [drag, setDrag] = useState<DragState | null>(null);
@@ -195,7 +197,7 @@ export function Zone({ zone, searchQuery, zoom, heatmapMax, otherZones = [] }: P
   }, [rotateS, updateZone, zone.id]);
 
   const onHeaderMouseDown = (e: React.MouseEvent) => {
-    if (zone.locked) return;
+    if (isLocked) return;
     e.stopPropagation();
     const additive = e.shiftKey || e.metaKey || e.ctrlKey;
     // ensure selection includes this zone
@@ -251,7 +253,7 @@ export function Zone({ zone, searchQuery, zoom, heatmapMax, otherZones = [] }: P
   const rotation = zone.rotation ?? 0;
 
   // Cursor logic
-  const cursor = zone.locked
+  const cursor = isLocked
     ? "not-allowed"
     : drag
       ? "grabbing"
@@ -306,7 +308,8 @@ export function Zone({ zone, searchQuery, zoom, heatmapMax, otherZones = [] }: P
             className={cn(
               "absolute group transition-shadow",
               selected && "z-20",
-              drag && "opacity-40"
+              drag && "opacity-40",
+              zone.hidden && "opacity-20 pointer-events-none"
             )}
             style={{
               left: zone.x,
@@ -323,15 +326,29 @@ export function Zone({ zone, searchQuery, zoom, heatmapMax, otherZones = [] }: P
                 "h-full w-full relative overflow-hidden border-2 transition-all",
                 zone.shape === "rounded" ? "rounded-3xl" : zone.shape === "rect" ? "rounded-md" : "",
                 isSpace
-                  ? "bg-muted/40 border-dashed border-muted-foreground/40"
-                  : "bg-card/95 backdrop-blur shadow-md",
+                  ? zone.spaceKind === "group"
+                    ? "border-dashed"
+                    : "bg-muted/40 border-dashed border-muted-foreground/40"
+                  : "backdrop-blur shadow-md",
                 selected && !isSpace && "shadow-lg",
                 isMulti && !selected && "ring-2 ring-accent ring-offset-2 ring-offset-background/50",
               )}
               style={{
                 clipPath: clip,
-                borderColor: selected ? `hsl(var(--ring))` : isSpace ? undefined : `hsl(${zone.color})`,
-                backgroundColor: !isSpace ? `hsl(${zone.color} / 0.06)` : undefined,
+                borderColor: selected
+                  ? `hsl(var(--ring))`
+                  : zone.borderColor
+                    ? `hsl(${zone.borderColor})`
+                    : isSpace
+                      ? zone.spaceKind === "group" ? `hsl(${zone.color})` : undefined
+                      : `hsl(${zone.color})`,
+                background: !isSpace
+                  ? zone.fillMode === "gradient" && zone.gradientTo
+                    ? `linear-gradient(135deg, hsl(${zone.color} / ${(zone.opacity ?? 1) * 0.15}), hsl(${zone.gradientTo} / ${(zone.opacity ?? 1) * 0.15}))`
+                    : `hsl(${zone.color} / ${(zone.opacity ?? 1) * 0.06})`
+                  : zone.spaceKind === "group"
+                    ? `hsl(${zone.color} / 0.04)`
+                    : undefined,
               }}
             >
               {/* HEADER = drag handle */}
@@ -341,8 +358,8 @@ export function Zone({ zone, searchQuery, zoom, heatmapMax, otherZones = [] }: P
                 onMouseLeave={() => setHoverHandle(false)}
                 className={cn(
                   "px-3 py-1.5 flex items-center justify-between text-xs font-semibold select-none transition-colors",
-                  zone.locked ? "cursor-not-allowed" : "cursor-grab active:cursor-grabbing",
-                  hoverHandle && !zone.locked && "brightness-110"
+                  isLocked ? "cursor-not-allowed" : "cursor-grab active:cursor-grabbing",
+                  hoverHandle && !isLocked && "brightness-110"
                 )}
                 style={{
                   backgroundColor: !isSpace ? `hsl(${zone.color} / 0.15)` : undefined,
@@ -351,7 +368,7 @@ export function Zone({ zone, searchQuery, zoom, heatmapMax, otherZones = [] }: P
               >
                 <span className="flex items-center gap-1.5 truncate">
                   <GripHorizontal className="h-3 w-3 opacity-60 shrink-0" />
-                  {zone.locked && <Lock className="h-3 w-3" />}
+                  {isLocked && <Lock className="h-3 w-3" />}
                   {isSpace ? SPACE_LABELS[zone.spaceKind ?? "blank"] : zone.name}
                 </span>
                 {!isSpace && (
@@ -389,7 +406,7 @@ export function Zone({ zone, searchQuery, zoom, heatmapMax, otherZones = [] }: P
             </div>
 
             {/* Resize handle */}
-            {!zone.locked && selected && (
+            {!isLocked && selected && (
               <div
                 onMouseDown={(e) => {
                   e.stopPropagation();
@@ -402,7 +419,7 @@ export function Zone({ zone, searchQuery, zoom, heatmapMax, otherZones = [] }: P
             )}
 
             {/* Rotation handle */}
-            {!zone.locked && selected && (
+            {!isLocked && selected && (
               <div
                 onMouseDown={(e) => {
                   e.stopPropagation();
@@ -419,7 +436,7 @@ export function Zone({ zone, searchQuery, zoom, heatmapMax, otherZones = [] }: P
                 <RotateCw className="h-3 w-3" />
               </div>
             )}
-            {!zone.locked && selected && (
+            {!isLocked && selected && (
               <div
                 className="absolute -top-4 left-1/2 -translate-x-1/2 w-px h-4 bg-accent print:hidden pointer-events-none"
               />

@@ -1,7 +1,7 @@
 export type ZoneShape = "rect" | "rounded" | "hex" | "oval" | "rhombus" | "parallelogram";
 export type SeatType = "empty" | "agent" | "leader" | "super" | "problem";
 export type Shift = "morning" | "evening" | "night" | "off";
-export type SpaceKind = "corridor" | "office" | "storage" | "pillar" | "blank";
+export type SpaceKind = "corridor" | "office" | "storage" | "pillar" | "blank" | "group";
 
 export interface PCHistoryEntry {
   id: string;
@@ -22,6 +22,19 @@ export interface Seat {
   history: PCHistoryEntry[];
 }
 
+export interface ColorStyle {
+  /** primary HSL string e.g. "221 83% 53%" */
+  color: string;
+  /** Optional second color for gradient */
+  gradientTo?: string;
+  /** "solid" | "gradient" */
+  fillMode?: "solid" | "gradient";
+  /** Border color HSL string. Defaults to color */
+  borderColor?: string;
+  /** 0..1 fill opacity */
+  opacity?: number;
+}
+
 export interface Zone {
   id: string;
   name: string;
@@ -31,26 +44,42 @@ export interface Zone {
   cols: number;
   startPc: number;
   color: string; // hsl values e.g. "221 83% 53%"
+  gradientTo?: string;
+  fillMode?: "solid" | "gradient";
+  borderColor?: string;
+  opacity?: number;
   x: number;
   y: number;
   width: number;
   height: number;
   locked: boolean;
+  hidden?: boolean;
   rotation?: number; // degrees
   zIndex?: number;
   notes?: string;
   seats: Seat[]; // length = rows*cols
   kind: "zone" | "space";
   spaceKind?: SpaceKind;
+  /** id of a parent space-group containing this element */
+  parentId?: string;
 }
 
 export interface Floor {
   id: string;
   name: string;
   zones: Zone[];
+  locked?: boolean;
+  bgColor?: string; // optional HSL, overrides theme background
 }
 
 export type ThemePreset = "modern" | "blueprint" | "corporate" | "minimal" | "darkpro";
+
+export interface Version {
+  id: string;
+  date: string;
+  label: string;
+  data: { floors: Floor[] };
+}
 
 export interface FloorPlanState {
   floors: Floor[];
@@ -67,7 +96,10 @@ export interface FloorPlanState {
   showLegend: boolean;
   showCompass: boolean;
   showScale: boolean;
+  showMiniMap: boolean;
   theme: ThemePreset;
+  customPalette: string[];
+  versions: Version[];
 }
 
 export interface ChangeLogEntry {
