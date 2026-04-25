@@ -229,14 +229,22 @@ export const useFloorPlan = create<Store>()(
         }),
 
       updateZone: (id, patch) =>
-        set((s) =>
-          withHistory(s, {
+        set((s) => {
+          const snap = s.snapToGrid;
+          const snapped: Partial<Zone> = { ...patch };
+          if (snap) {
+            if (typeof snapped.x === "number") snapped.x = snapVal(snapped.x, true);
+            if (typeof snapped.y === "number") snapped.y = snapVal(snapped.y, true);
+            if (typeof snapped.width === "number") snapped.width = snapVal(snapped.width, true);
+            if (typeof snapped.height === "number") snapped.height = snapVal(snapped.height, true);
+          }
+          return withHistory(s, {
             floors: updateActiveFloor(s, (f) => ({
               ...f,
               zones: f.zones.map((z) => {
                 if (z.id !== id) return z;
                 if (z.locked && !("locked" in patch)) return z;
-                let next = { ...z, ...patch };
+                let next = { ...z, ...snapped };
                 // re-build seats if grid/start changed
                 if (
                   z.kind === "zone" &&
