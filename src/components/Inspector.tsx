@@ -9,8 +9,9 @@ import type { ZoneShape, Shift } from "@/types/floorplan";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import { ColorPicker } from "./ColorPicker";
 import {
-  Lock, Unlock, Copy, Trash2, Plus, AlertTriangle, Info,
+  Lock, Unlock, Copy, Trash2, Plus, AlertTriangle, Info, Ungroup,
 } from "lucide-react";
 import { toast } from "sonner";
 
