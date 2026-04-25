@@ -22,7 +22,7 @@ function buildReport(floors: ReturnType<typeof useFloorPlan.getState>["floors"])
       totalSeats += seats; totalAgents += agents; totalProblems += problems;
       lines.push(`  • ${z.name}: ${agents}/${seats} occupied — ${problems} problem(s)`);
       const issued = z.seats.filter((s) => s.problemCount > 0).sort((a, b) => b.problemCount - a.problemCount).slice(0, 5);
-      issued.forEach((s) => lines.push(`      - PC ${s.pcNumber}${s.agentName ? ` (${s.agentName})` : ""}: ${s.problemCount} issue(s)`));
+      issued.forEach((s) => lines.push(`      - PC ${s.pcNumber}: ${s.problemCount} issue(s)`));
     }
   }
   lines.push("\n" + "=".repeat(50));

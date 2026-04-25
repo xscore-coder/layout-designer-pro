@@ -19,6 +19,7 @@ import { ThemePicker } from "./ThemePicker";
 import { toast } from "sonner";
 import Papa from "papaparse";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import vodafoneLogo from "@/assets/vodafone-logo.png";
 
 interface Props {
   search: string;
@@ -64,16 +65,16 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
   };
 
   const exportExcel = () => {
-    const rows = [["Floor", "Zone", "PC", "Type", "Agent", "Shift", "Team", "Problems", "Notes"]];
+    const rows = [["Floor", "Zone", "PC", "Type", "Problems", "Notes", "Wasla SCT Feedback"]];
     floors.forEach((f) => f.zones.forEach((z) => z.kind === "zone" && z.seats.forEach((s) => {
       rows.push([
         f.name, z.name, s.pcNumber, s.type,
-        s.agentName ?? "", s.shift ?? "", s.team ?? "",
-        String(s.problemCount), s.note ?? "",
+        String(s.problemCount), s.note ?? "", s.waslaSctFeedback ?? "",
       ]);
     })));
     const csv = Papa.unparse(rows);
-    const blob = new Blob([csv], { type: "text/csv" });
+    // UTF-8 BOM so Excel renders Arabic correctly
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url; a.download = `seats-${Date.now()}.csv`; a.click();
@@ -117,7 +118,7 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
     <>
       <div className="h-14 border-b border-border bg-card/80 backdrop-blur flex items-center gap-1 px-3 shrink-0 z-10">
         <div className="flex items-center gap-2 mr-3">
-          <div className="h-7 w-7 rounded-lg bg-gradient-primary shadow-glow" />
+          <img src={vodafoneLogo} alt="Vodafone" className="h-8 w-8 object-contain" />
           <h1 className="font-bold text-sm hidden md:block">Vodafone Floor</h1>
         </div>
 

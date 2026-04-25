@@ -54,9 +54,7 @@ export function Seat({ seat, zone, highlighted, heatmapMax }: Props) {
         e.stopPropagation();
         select(seat.id);
       }}
-      title={`PC ${seat.pcNumber}${seat.agentName ? ` • ${seat.agentName}` : ""}${
-        seat.problemCount ? ` • ${seat.problemCount} issue(s)` : ""
-      }`}
+      title={`PC ${seat.pcNumber}${seat.problemCount ? ` • ${seat.problemCount} issue(s)` : ""}`}
       className={cn(
         "relative h-9 w-9 rounded-md flex items-center justify-center text-[10px] font-semibold transition-all",
         "hover:scale-110 hover:z-10 hover:shadow-md",
@@ -68,15 +66,6 @@ export function Seat({ seat, zone, highlighted, heatmapMax }: Props) {
     >
       <Icon className="absolute inset-0 m-auto h-3.5 w-3.5 opacity-70" />
       <span className="absolute -bottom-3 text-[8px] text-foreground/70 font-mono">{seat.pcNumber}</span>
-      {seat.shift && (
-        <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full ring-1 ring-card"
-          style={{
-            backgroundColor:
-              seat.shift === "morning" ? "hsl(38 92% 50%)" :
-              seat.shift === "evening" ? "hsl(271 76% 53%)" :
-              seat.shift === "night" ? "hsl(217 91% 50%)" : "hsl(220 13% 60%)",
-          }} />
-      )}
     </button>
   );
 }

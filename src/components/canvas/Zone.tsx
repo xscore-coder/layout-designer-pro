@@ -245,7 +245,7 @@ export function Zone({ zone, searchQuery, zoom, heatmapMax, otherZones = [] }: P
     zone.seats.forEach((s) => {
       if (
         s.pcNumber.toLowerCase().includes(q) ||
-        s.agentName?.toLowerCase().includes(q)
+        s.note?.toLowerCase().includes(q)
       ) highlightSeatIds.add(s.id);
     });
   }
