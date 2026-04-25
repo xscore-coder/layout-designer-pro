@@ -16,10 +16,14 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
   const zoom = useFloorPlan((s) => s.zoom);
   const setZoom = useFloorPlan((s) => s.setZoom);
   const selectZone = useFloorPlan((s) => s.selectZone);
+  const clearSelection = useFloorPlan((s) => s.clearSelection);
   const removeZone = useFloorPlan((s) => s.removeZone);
   const selectedZoneId = useFloorPlan((s) => s.selectedZoneId);
+  const selectedZoneIds = useFloorPlan((s) => s.selectedZoneIds);
+  const moveSelectedBy = useFloorPlan((s) => s.moveSelectedBy);
   const undo = useFloorPlan((s) => s.undo);
   const redo = useFloorPlan((s) => s.redo);
+  const duplicateZone = useFloorPlan((s) => s.duplicateZone);
   const showCompass = useFloorPlan((s) => s.showCompass);
   const showScale = useFloorPlan((s) => s.showScale);
   const showLegend = useFloorPlan((s) => s.showLegend);
@@ -44,16 +48,30 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
       } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "y") {
         e.preventDefault();
         redo();
-      } else if (e.key === "Delete" || e.key === "Backspace") {
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "d") {
         if (selectedZoneId) {
           e.preventDefault();
-          removeZone(selectedZoneId);
+          duplicateZone(selectedZoneId);
         }
+      } else if (e.key === "Escape") {
+        clearSelection();
+      } else if (e.key === "Delete" || e.key === "Backspace") {
+        if (selectedZoneIds.length) {
+          e.preventDefault();
+          selectedZoneIds.forEach((id) => removeZone(id));
+        }
+      } else if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
+        if (!selectedZoneIds.length) return;
+        e.preventDefault();
+        const step = e.shiftKey ? 10 : 1;
+        const dx = e.key === "ArrowLeft" ? -step : e.key === "ArrowRight" ? step : 0;
+        const dy = e.key === "ArrowUp" ? -step : e.key === "ArrowDown" ? step : 0;
+        moveSelectedBy(dx, dy);
       }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [undo, redo, selectedZoneId, removeZone]);
+  }, [undo, redo, selectedZoneId, selectedZoneIds, removeZone, moveSelectedBy, clearSelection, duplicateZone]);
 
   useEffect(() => {
     if (!pan) return;
