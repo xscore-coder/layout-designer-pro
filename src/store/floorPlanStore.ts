@@ -711,6 +711,124 @@ export const useFloorPlan = create<Store>()(
             changeLog: log(s, "Loaded JSON"),
           })
         ),
+
+      // ===== Floor Lock + Floor properties =====
+      toggleFloorLock: (id) =>
+        set((s) =>
+          withHistory(s, {
+            floors: s.floors.map((f) => (f.id === id ? { ...f, locked: !f.locked } : f)),
+            changeLog: log(s, "Toggled floor lock"),
+          })
+        ),
+
+      updateFloor: (id, patch) =>
+        set((s) =>
+          withHistory(s, {
+            floors: s.floors.map((f) => (f.id === id ? { ...f, ...patch } : f)),
+            changeLog: log(s, "Updated floor"),
+          })
+        ),
+
+      // ===== Group selected zones into a Space container =====
+      groupSelectedAsSpace: () =>
+        set((s) => {
+          const f = activeFloor(s);
+          if (!f || s.selectedZoneIds.length < 1) return {};
+          const sel = f.zones.filter((z) => s.selectedZoneIds.includes(z.id));
+          if (!sel.length) return {};
+          const PAD = 24;
+          const minX = Math.min(...sel.map((z) => z.x)) - PAD;
+          const minY = Math.min(...sel.map((z) => z.y)) - PAD - 10;
+          const maxX = Math.max(...sel.map((z) => z.x + z.width)) + PAD;
+          const maxY = Math.max(...sel.map((z) => z.y + z.height)) + PAD;
+          const groupId = uid();
+          const container: Zone = {
+            id: groupId,
+            name: "Group",
+            shape: "rect",
+            rows: 0, cols: 0, startPc: 0,
+            color: "215 16% 65%",
+            x: minX, y: minY,
+            width: maxX - minX,
+            height: maxY - minY,
+            locked: false,
+            seats: [],
+            kind: "space",
+            spaceKind: "group",
+          };
+          return withHistory(s, {
+            floors: updateActiveFloor(s, (fl) => {
+              // place group BEHIND its children
+              const others = fl.zones.filter((z) => !sel.find((x) => x.id === z.id));
+              const childrenWithParent = sel.map((z) => ({ ...z, parentId: groupId }));
+              return { ...fl, zones: [...others, container, ...childrenWithParent] };
+            }),
+            selectedZoneId: groupId,
+            selectedZoneIds: [groupId],
+            changeLog: log(s, "Grouped into space"),
+          });
+        }),
+
+      ungroupSpace: (spaceId) =>
+        set((s) =>
+          withHistory(s, {
+            floors: updateActiveFloor(s, (f) => ({
+              ...f,
+              zones: f.zones
+                .filter((z) => z.id !== spaceId)
+                .map((z) => (z.parentId === spaceId ? { ...z, parentId: undefined } : z)),
+            })),
+            selectedZoneId: null,
+            selectedZoneIds: [],
+            changeLog: log(s, "Ungrouped space"),
+          })
+        ),
+
+      // ===== Versions (autosave / manual) =====
+      saveVersion: (label) =>
+        set((s) => ({
+          versions: [
+            {
+              id: uid(),
+              date: new Date().toISOString(),
+              label: label ?? `Snapshot ${new Date().toLocaleTimeString()}`,
+              data: { floors: JSON.parse(JSON.stringify(s.floors)) },
+            },
+            ...s.versions,
+          ].slice(0, 30),
+          changeLog: log(s, "Saved version", label),
+        })),
+
+      restoreVersion: (id) =>
+        set((s) => {
+          const v = s.versions.find((x) => x.id === id);
+          if (!v) return {};
+          return withHistory(s, {
+            floors: JSON.parse(JSON.stringify(v.data.floors)),
+            changeLog: log(s, "Restored version", v.label),
+          });
+        }),
+
+      removeVersion: (id) =>
+        set((s) => ({ versions: s.versions.filter((v) => v.id !== id) })),
+
+      // ===== Custom Palette =====
+      addPaletteColor: (hsl) =>
+        set((s) => ({
+          customPalette: s.customPalette.includes(hsl) ? s.customPalette : [hsl, ...s.customPalette].slice(0, 24),
+        })),
+      removePaletteColor: (hsl) =>
+        set((s) => ({ customPalette: s.customPalette.filter((c) => c !== hsl) })),
+
+      // ===== Visibility =====
+      toggleZoneVisibility: (id) =>
+        set((s) => ({
+          floors: updateActiveFloor(s, (f) => ({
+            ...f,
+            zones: f.zones.map((z) => (z.id === id ? { ...z, hidden: !z.hidden } : z)),
+          })),
+        })),
+      toggleMiniMap: () => set((s) => ({ showMiniMap: !s.showMiniMap })),
     }),
     {
       name: "floorplan-v1",
