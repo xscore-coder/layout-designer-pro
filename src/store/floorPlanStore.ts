@@ -273,8 +273,8 @@ export const useFloorPlan = create<Store>()(
               }),
             })),
             changeLog: log(s, "Updated zone"),
-          })
-        ),
+          });
+        }),
 
       removeZone: (id) =>
         set((s) =>
