@@ -13,6 +13,7 @@ export interface PCHistoryEntry {
 export interface Seat {
   id: string;
   pcNumber: string;
+  lockNumber?: string;
   type: SeatType;
   note?: string;
   waslaSctFeedback?: string;
