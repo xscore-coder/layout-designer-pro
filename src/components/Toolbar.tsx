@@ -5,7 +5,7 @@ import { useFloorPlan } from "@/store/floorPlanStore";
 import {
   Plus, Square, Combine, History, FileBarChart, Search, Download,
   Upload, Undo2, Redo2, Moon, Sun, Flame, LayoutGrid, Trash2, FileSpreadsheet, Printer, ShieldAlert,
-  Group, LayoutTemplate, Save,
+  Group, LayoutTemplate, Save, LayoutDashboard,
 } from "lucide-react";
 import { AddZoneDialog } from "./dialogs/AddZoneDialog";
 import { AddSpaceDialog } from "./dialogs/AddSpaceDialog";
@@ -15,6 +15,7 @@ import { HistoryDrawer } from "./dialogs/HistoryDrawer";
 import { PrintDialog } from "./dialogs/PrintDialog";
 import { VersionsDialog } from "./dialogs/VersionsDialog";
 import { TemplatesDialog } from "./dialogs/TemplatesDialog";
+import { DashboardDialog } from "./dialogs/DashboardDialog";
 import { ThemePicker } from "./ThemePicker";
 import { toast } from "sonner";
 import Papa from "papaparse";
