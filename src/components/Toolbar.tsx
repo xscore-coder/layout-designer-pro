@@ -5,7 +5,7 @@ import { useFloorPlan } from "@/store/floorPlanStore";
 import {
   Plus, Square, Combine, History, FileBarChart, Search, Download,
   Upload, Undo2, Redo2, Moon, Sun, Flame, LayoutGrid, Trash2, FileSpreadsheet, Printer, ShieldAlert,
-  Group, LayoutTemplate, Save,
+  Group, LayoutTemplate, Save, LayoutDashboard,
 } from "lucide-react";
 import { AddZoneDialog } from "./dialogs/AddZoneDialog";
 import { AddSpaceDialog } from "./dialogs/AddSpaceDialog";
@@ -15,6 +15,7 @@ import { HistoryDrawer } from "./dialogs/HistoryDrawer";
 import { PrintDialog } from "./dialogs/PrintDialog";
 import { VersionsDialog } from "./dialogs/VersionsDialog";
 import { TemplatesDialog } from "./dialogs/TemplatesDialog";
+import { DashboardDialog } from "./dialogs/DashboardDialog";
 import { ThemePicker } from "./ThemePicker";
 import { toast } from "sonner";
 import Papa from "papaparse";
@@ -36,6 +37,7 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
   const [printOpen, setPrintOpen] = useState(false);
   const [versionsOpen, setVersionsOpen] = useState(false);
   const [templatesOpen, setTemplatesOpen] = useState(false);
+  const [dashboardOpen, setDashboardOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const jsonRef = useRef<HTMLInputElement>(null);
 
@@ -191,6 +193,10 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
             </Button>
           </TooltipTrigger><TooltipContent>Versions</TooltipContent></Tooltip>
 
+          <Button size="sm" variant="ghost" onClick={() => setDashboardOpen(true)}>
+            <LayoutDashboard className="h-4 w-4 mr-1" /> Dashboard
+          </Button>
+
           <Button size="sm" variant="ghost" onClick={() => setReportOpen(true)}>
             <FileBarChart className="h-4 w-4 mr-1" /> Report
           </Button>
@@ -254,6 +260,7 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
       <PrintDialog open={printOpen} onOpenChange={setPrintOpen} getStageEl={getStageEl} />
       <VersionsDialog open={versionsOpen} onOpenChange={setVersionsOpen} />
       <TemplatesDialog open={templatesOpen} onOpenChange={setTemplatesOpen} />
+      <DashboardDialog open={dashboardOpen} onOpenChange={setDashboardOpen} />
     </>
   );
 }
