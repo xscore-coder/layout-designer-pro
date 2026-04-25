@@ -3,9 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useFloorPlan } from "@/store/floorPlanStore";
 import {
-  Plus, Square, Combine, History, FileBarChart, Search, Download,
+  Plus, Square, Combine, History, FileBarChart, Download,
   Upload, Undo2, Redo2, Moon, Sun, Flame, LayoutGrid, Trash2, FileSpreadsheet, Printer, ShieldAlert,
-  Group, LayoutTemplate, Save, LayoutDashboard,
+  Group, LayoutTemplate, Save, LayoutDashboard, Eraser,
 } from "lucide-react";
 import { AddZoneDialog } from "./dialogs/AddZoneDialog";
 import { AddSpaceDialog } from "./dialogs/AddSpaceDialog";
