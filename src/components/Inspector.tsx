@@ -76,6 +76,32 @@ export function Inspector() {
                   onChange={(e) => updateZone(zone.id, { description: e.target.value })}
                 />
               </div>
+
+              {/* Pro Color Picker */}
+              <div>
+                <Label>Color</Label>
+                <ColorPicker
+                  value={zone.color}
+                  onChange={(c) => updateZone(zone.id, { color: c })}
+                  fillMode={zone.fillMode ?? "solid"}
+                  onFillModeChange={(m) => updateZone(zone.id, { fillMode: m })}
+                  gradientTo={zone.gradientTo}
+                  onGradientChange={(g) => updateZone(zone.id, { gradientTo: g })}
+                  borderColor={zone.borderColor}
+                  onBorderChange={(b) => updateZone(zone.id, { borderColor: b })}
+                  opacity={zone.opacity ?? 1}
+                  onOpacityChange={(o) => updateZone(zone.id, { opacity: o })}
+                />
+              </div>
+
+              {/* Ungroup button for group spaces */}
+              {zone.kind === "space" && zone.spaceKind === "group" && (
+                <Button variant="outline" size="sm" className="w-full"
+                  onClick={() => { ungroupSpace(zone.id); toast.success("Ungrouped"); }}>
+                  <Ungroup className="h-3 w-3 mr-1" /> Ungroup
+                </Button>
+              )}
+
               {zone.kind === "zone" && (
                 <>
                   <div className="grid grid-cols-3 gap-2">
