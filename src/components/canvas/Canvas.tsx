@@ -160,6 +160,17 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
       {showCompass && <NorthArrow />}
       {showScale && <ScaleBar zoom={zoom} />}
 
+      {/* Mini-Map navigator */}
+      <MiniMap />
+
+      {/* Floor lock badge */}
+      {floor.locked && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-warning/95 text-warning-foreground rounded-full px-3 py-1.5 shadow-lg flex items-center gap-2 text-xs font-semibold print:hidden z-30">
+          <Lock className="h-3.5 w-3.5" />
+          Floor Locked — All edits disabled
+        </div>
+      )}
+
       {/* Zoom controls */}
       <div className="absolute bottom-4 right-4 flex flex-col gap-1 bg-card/90 backdrop-blur rounded-lg shadow-md border border-border p-1 print:hidden">
         <Button size="icon" variant="ghost" onClick={() => setZoom(zoom + 0.1)}>
