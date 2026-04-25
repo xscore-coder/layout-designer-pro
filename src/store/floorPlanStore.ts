@@ -360,7 +360,7 @@ export const useFloorPlan = create<Store>()(
                       ...seat,
                       type: next,
                       history: [
-                        { id: uid(), date: new Date().toISOString(), type: "change", description: `Type → ${next}` },
+                        { id: uid(), date: new Date().toISOString(), type: "change" as const, description: `Type → ${next}` },
                         ...seat.history,
                       ].slice(0, 50),
                     };
