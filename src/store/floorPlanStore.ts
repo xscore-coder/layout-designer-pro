@@ -10,7 +10,11 @@ import type {
   ChangeLogEntry,
   Shift,
   SpaceKind,
+  ThemePreset,
 } from "@/types/floorplan";
+
+const SNAP_GRID = 10;
+const snapVal = (n: number, enabled: boolean) => (enabled ? Math.round(n / SNAP_GRID) * SNAP_GRID : n);
 
 const uid = () => Math.random().toString(36).slice(2, 10);
 
@@ -79,6 +83,13 @@ interface Store extends FloorPlanState {
   setZoom: (z: number) => void;
   toggleDark: () => void;
   toggleHeatmap: () => void;
+  toggleSnap: () => void;
+  toggleSmartGuides: () => void;
+  toggleLegend: () => void;
+  toggleCompass: () => void;
+  toggleScale: () => void;
+  setTheme: (t: ThemePreset) => void;
+  renumberZones: () => void;
 
   // import
   importPCs: (rows: { pc: string; problems?: number; agent?: string; shift?: Shift }[]) => void;
@@ -120,6 +131,12 @@ export const useFloorPlan = create<Store>()(
       darkMode: false,
       heatmap: false,
       zoom: 1,
+      snapToGrid: true,
+      smartGuides: true,
+      showLegend: true,
+      showCompass: true,
+      showScale: true,
+      theme: "modern",
       past: [],
       future: [],
       changeLog: [],
