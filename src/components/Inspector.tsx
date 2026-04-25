@@ -237,6 +237,14 @@ export function Inspector() {
                   />
                 </div>
                 <div>
+                  <Label>Lock Number</Label>
+                  <Input
+                    value={seat.lockNumber ?? ""}
+                    onChange={(e) => updateSeat(zone.id, seat.id, { lockNumber: e.target.value })}
+                    placeholder="e.g. LK-2034"
+                  />
+                </div>
+                <div>
                   <Label>Note</Label>
                   <Textarea
                     rows={2}

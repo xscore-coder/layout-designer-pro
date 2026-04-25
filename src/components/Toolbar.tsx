@@ -67,10 +67,10 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
   };
 
   const exportExcel = () => {
-    const rows = [["Floor", "Zone", "PC", "Type", "Problems", "Notes", "Wasla SCT Feedback"]];
+    const rows = [["Floor", "Zone", "PC", "Lock Number", "Type", "Problems", "Notes", "Wasla SCT Feedback"]];
     floors.forEach((f) => f.zones.forEach((z) => z.kind === "zone" && z.seats.forEach((s) => {
       rows.push([
-        f.name, z.name, s.pcNumber, s.type,
+        f.name, z.name, s.pcNumber, s.lockNumber ?? "", s.type,
         String(s.problemCount), s.note ?? "", s.waslaSctFeedback ?? "",
       ]);
     })));
