@@ -20,7 +20,7 @@ import { ThemePicker } from "./ThemePicker";
 import { toast } from "sonner";
 import Papa from "papaparse";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import vodafoneLogo from "@/assets/vodafone-logo.png";
+import { Input } from "@/components/ui/input";
 
 interface Props {
   search: string;
