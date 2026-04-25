@@ -109,6 +109,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
     <div
       ref={containerRef}
       className={`relative flex-1 overflow-hidden ${themeBg[theme] ?? "canvas-grid-bg"}`}
+      style={floor.bgColor ? { backgroundColor: `hsl(${floor.bgColor})` } : undefined}
       onMouseDown={(e) => {
         if (e.button === 1 || (e.button === 0 && e.altKey)) {
           e.preventDefault();
