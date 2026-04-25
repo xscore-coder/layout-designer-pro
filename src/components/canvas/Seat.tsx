@@ -28,7 +28,7 @@ export function Seat({ seat, zone, highlighted, heatmapMax }: Props) {
   const selected = useFloorPlan((s) => s.selectedSeatId === seat.id);
   const heatmap = useFloorPlan((s) => s.heatmap);
 
-  const Icon = ICONS[seat.type];
+  const Icon = ICONS[seat.type] ?? MinusCircle;
 
   let heatStyle: React.CSSProperties = {};
   if (heatmap && seat.problemCount > 0) {
@@ -60,7 +60,7 @@ export function Seat({ seat, zone, highlighted, heatmapMax }: Props) {
       className={cn(
         "relative h-9 w-9 rounded-md flex items-center justify-center text-[10px] font-semibold transition-all",
         "hover:scale-110 hover:z-10 hover:shadow-md",
-        TYPE_BG[seat.type],
+        TYPE_BG[seat.type] ?? TYPE_BG.empty,
         selected && "ring-2 ring-ring ring-offset-1 ring-offset-card",
         highlighted && "ring-2 ring-warning"
       )}
