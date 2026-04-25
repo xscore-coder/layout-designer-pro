@@ -17,7 +17,7 @@ function buildReport(floors: ReturnType<typeof useFloorPlan.getState>["floors"])
     for (const z of f.zones) {
       if (z.kind !== "zone") continue;
       const seats = z.seats.length;
-      const agents = z.seats.filter((s) => s.type === "agent" || s.type === "leader" || s.type === "super").length;
+      const agents = z.seats.filter((s) => s.type === "pc" || s.type === "problem").length;
       const problems = z.seats.reduce((acc, s) => acc + s.problemCount, 0);
       totalSeats += seats; totalAgents += agents; totalProblems += problems;
       lines.push(`  • ${z.name}: ${agents}/${seats} occupied — ${problems} problem(s)`);
