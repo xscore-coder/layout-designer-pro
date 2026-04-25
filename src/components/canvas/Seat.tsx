@@ -28,7 +28,7 @@ export function Seat({ seat, zone, highlighted, heatmapMax }: Props) {
   const selected = useFloorPlan((s) => s.selectedSeatId === seat.id);
   const heatmap = useFloorPlan((s) => s.heatmap);
 
-  const Icon = ICONS[seat.type];
+  const Icon = ICONS[seat.type] ?? MinusCircle;
 
   let heatStyle: React.CSSProperties = {};
   if (heatmap && seat.problemCount > 0) {
