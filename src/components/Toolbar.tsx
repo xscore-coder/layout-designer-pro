@@ -56,6 +56,8 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
   const groupSelected = useFloorPlan((s) => s.groupSelectedAsSpace);
   const selectedZoneIds = useFloorPlan((s) => s.selectedZoneIds);
   const saveVersion = useFloorPlan((s) => s.saveVersion);
+  const activeFloorId = useFloorPlan((s) => s.activeFloorId);
+  const updateFloor = useFloorPlan((s) => s.updateFloor);
 
   const exportJSON = () => {
     const blob = new Blob([JSON.stringify({ floors }, null, 2)], { type: "application/json" });
