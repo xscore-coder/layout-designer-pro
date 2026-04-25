@@ -240,18 +240,6 @@ function LegendCard() {
   );
 }
 
-function NorthArrow() {
-  return (
-    <div className="absolute top-4 left-4 bg-card/95 backdrop-blur rounded-full shadow-md border border-border h-14 w-14 flex flex-col items-center justify-center">
-      <Compass className="h-3 w-3 text-muted-foreground absolute top-1" />
-      <div className="text-[8px] text-muted-foreground absolute top-3.5">N</div>
-      <svg viewBox="0 0 40 40" className="h-10 w-10">
-        <polygon points="20,6 26,28 20,22 14,28" fill="hsl(var(--destructive))" />
-        <polygon points="20,34 14,28 20,22 26,28" fill="hsl(var(--muted-foreground) / 0.5)" />
-      </svg>
-    </div>
-  );
-}
 
 function ScaleBar({ zoom }: { zoom: number }) {
   // 100px on canvas at zoom=1 represents arbitrary scale: 1m
