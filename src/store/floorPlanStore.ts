@@ -61,6 +61,25 @@ interface Store extends FloorPlanState {
   removeFloor: (id: string) => void;
   renameFloor: (id: string, name: string) => void;
   setActiveFloor: (id: string) => void;
+  toggleFloorLock: (id: string) => void;
+  updateFloor: (id: string, patch: Partial<Floor>) => void;
+
+  // grouping
+  groupSelectedAsSpace: () => void;
+  ungroupSpace: (spaceId: string) => void;
+
+  // versions
+  saveVersion: (label?: string) => void;
+  restoreVersion: (id: string) => void;
+  removeVersion: (id: string) => void;
+
+  // palette
+  addPaletteColor: (hsl: string) => void;
+  removePaletteColor: (hsl: string) => void;
+
+  // visibility
+  toggleZoneVisibility: (id: string) => void;
+  toggleMiniMap: () => void;
 
   // zone ops
   addZone: (input: Partial<Zone> & { name: string; rows: number; cols: number }) => void;
