@@ -451,7 +451,7 @@ export const useFloorPlan = create<Store>()(
                           {
                             id: uid(),
                             date: new Date().toISOString(),
-                            type: "problem",
+                            type: "problem" as const,
                             description: `Imported: ${problems} problem(s)`,
                           },
                           ...seat.history,
