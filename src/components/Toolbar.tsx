@@ -217,6 +217,7 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
       <MergeZonesDialog open={mergeOpen} onOpenChange={setMergeOpen} />
       <ReportDialog open={reportOpen} onOpenChange={setReportOpen} />
       <HistoryDrawer open={historyOpen} onOpenChange={setHistoryOpen} />
+      <PrintDialog open={printOpen} onOpenChange={setPrintOpen} getStageEl={getStageEl} />
     </>
   );
 }
