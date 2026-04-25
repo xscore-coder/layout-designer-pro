@@ -135,19 +135,27 @@ export function Inspector() {
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
                       <Label>Seat spacing</Label>
-                      <span className="text-xs font-mono text-muted-foreground">
-                        {zone.seatGap ?? 8}px
-                      </span>
+                      <Input
+                        type="number"
+                        min={0}
+                        step={1}
+                        value={zone.seatGap ?? 8}
+                        onChange={(e) => {
+                          const v = Math.max(0, Number(e.target.value) || 0);
+                          updateZone(zone.id, { seatGap: v });
+                        }}
+                        className="h-7 w-20 text-xs font-mono text-right"
+                      />
                     </div>
                     <Slider
                       min={0}
-                      max={32}
+                      max={Math.max(64, (zone.seatGap ?? 8) + 8)}
                       step={1}
                       value={[zone.seatGap ?? 8]}
                       onValueChange={(v) => updateZone(zone.id, { seatGap: v[0] })}
                     />
                     <p className="text-[10px] text-muted-foreground mt-1">
-                      المسافة بين كل خلية والتانية داخل الزون
+                      المسافة بين كل خلية والتانية داخل الزون (px) — اكتب أي رقم يدوياً
                     </p>
                   </div>
                   <div>
