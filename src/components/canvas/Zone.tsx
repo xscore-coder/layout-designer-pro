@@ -77,6 +77,8 @@ export function Zone({ zone, searchQuery, zoom, heatmapMax, otherZones = [] }: P
   const toggleLock = useFloorPlan((s) => s.toggleLock);
   const bringToFront = useFloorPlan((s) => s.bringSelectedToFront);
   const sendToBack = useFloorPlan((s) => s.sendSelectedToBack);
+  const floorLocked = useFloorPlan((s) => s.floors.find((f) => f.id === s.activeFloorId)?.locked ?? false);
+  const isLocked = zone.locked || floorLocked;
 
   const ref = useRef<HTMLDivElement>(null);
   const [drag, setDrag] = useState<DragState | null>(null);
