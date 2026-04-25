@@ -859,8 +859,11 @@ export const useFloorPlan = create<Store>()(
         showLegend: s.showLegend,
         showCompass: s.showCompass,
         showScale: s.showScale,
+        showMiniMap: s.showMiniMap,
         collisionDetection: s.collisionDetection,
         theme: s.theme,
+        customPalette: s.customPalette,
+        versions: s.versions,
       }),
       onRehydrateStorage: () => (state) => {
         if (state?.darkMode) document.documentElement.classList.add("dark");
