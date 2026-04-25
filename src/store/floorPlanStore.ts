@@ -450,6 +450,24 @@ export const useFloorPlan = create<Store>()(
           return { darkMode: dark };
         }),
       toggleHeatmap: () => set((s) => ({ heatmap: !s.heatmap })),
+      toggleSnap: () => set((s) => ({ snapToGrid: !s.snapToGrid })),
+      toggleSmartGuides: () => set((s) => ({ smartGuides: !s.smartGuides })),
+      toggleLegend: () => set((s) => ({ showLegend: !s.showLegend })),
+      toggleCompass: () => set((s) => ({ showCompass: !s.showCompass })),
+      toggleScale: () => set((s) => ({ showScale: !s.showScale })),
+      setTheme: (t) => set({ theme: t }),
+      renumberZones: () =>
+        set((s) =>
+          withHistory(s, {
+            floors: updateActiveFloor(s, (f) => ({
+              ...f,
+              zones: f.zones.map((z, i) =>
+                z.kind === "zone" ? { ...z, name: `Z${i + 1} • ${z.name.replace(/^Z\d+\s*•\s*/, "")}` } : z
+              ),
+            })),
+            changeLog: log(s, "Renumbered zones"),
+          })
+        ),
 
       importPCs: (rows) =>
         set((s) => {
