@@ -166,13 +166,24 @@ export const useFloorPlan = create<Store>()(
       showLegend: true,
       showCompass: true,
       showScale: true,
+      showMiniMap: true,
       collisionDetection: false,
       theme: "modern",
+      customPalette: [],
+      versions: [],
       past: [],
       future: [],
       changeLog: [],
 
       addFloor: () =>
+        set((s) => {
+          const f = defaultFloor(`Floor ${s.floors.length + 1}`);
+          return withHistory(s, {
+            floors: [...s.floors, f],
+            activeFloorId: f.id,
+            changeLog: log(s, "Added floor", f.name),
+          });
+        }),
         set((s) => {
           const f = defaultFloor(`Floor ${s.floors.length + 1}`);
           return withHistory(s, {
