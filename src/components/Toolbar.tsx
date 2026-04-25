@@ -64,12 +64,12 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
   };
 
   const exportExcel = () => {
-    const rows = [["Floor", "Zone", "PC", "Type", "Agent", "Shift", "Team", "Problems"]];
+    const rows = [["Floor", "Zone", "PC", "Type", "Agent", "Shift", "Team", "Problems", "Notes"]];
     floors.forEach((f) => f.zones.forEach((z) => z.kind === "zone" && z.seats.forEach((s) => {
       rows.push([
         f.name, z.name, s.pcNumber, s.type,
         s.agentName ?? "", s.shift ?? "", s.team ?? "",
-        String(s.problemCount),
+        String(s.problemCount), s.note ?? "",
       ]);
     })));
     const csv = Papa.unparse(rows);
