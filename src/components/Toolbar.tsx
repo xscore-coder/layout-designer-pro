@@ -20,6 +20,10 @@ import { ThemePicker } from "./ThemePicker";
 import { toast } from "sonner";
 import Papa from "papaparse";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import vodafoneLogo from "@/assets/vodafone-logo.png";
 
 interface Props {
