@@ -264,6 +264,9 @@ export const useFloorPlan = create<Store>()(
 
       updateZone: (id, patch) =>
         set((s) => {
+          // floor-level lock blocks all edits
+          const af = activeFloor(s);
+          if (af?.locked) return {};
           const snap = s.snapToGrid;
           const snapped: Partial<Zone> = { ...patch };
           if (snap) {
@@ -271,6 +274,16 @@ export const useFloorPlan = create<Store>()(
             if (typeof snapped.y === "number") snapped.y = snapVal(snapped.y, true);
             if (typeof snapped.width === "number") snapped.width = snapVal(snapped.width, true);
             if (typeof snapped.height === "number") snapped.height = snapVal(snapped.height, true);
+          }
+          // If moving a group container, move its children together
+          const movingGroup =
+            (typeof patch.x === "number" || typeof patch.y === "number") &&
+            af?.zones.find((z) => z.id === id)?.spaceKind === "group";
+          let dx = 0, dy = 0;
+          if (movingGroup) {
+            const orig = af!.zones.find((z) => z.id === id)!;
+            dx = (snapped.x ?? orig.x) - orig.x;
+            dy = (snapped.y ?? orig.y) - orig.y;
           }
           return withHistory(s, {
             floors: updateActiveFloor(s, (f) => ({
