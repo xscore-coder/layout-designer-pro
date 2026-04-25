@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { useFloorPlan } from "@/store/floorPlanStore";
 import {
   Plus, Square, Combine, History, FileBarChart, Search, Download,
-  Upload, Undo2, Redo2, Moon, Sun, Flame, LayoutGrid, Trash2, FileSpreadsheet, Printer,
+  Upload, Undo2, Redo2, Moon, Sun, Flame, LayoutGrid, Trash2, FileSpreadsheet, Printer, ShieldAlert,
 } from "lucide-react";
 import { AddZoneDialog } from "./dialogs/AddZoneDialog";
 import { AddSpaceDialog } from "./dialogs/AddSpaceDialog";
@@ -39,6 +39,8 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
   const toggleDark = useFloorPlan((s) => s.toggleDark);
   const heatmap = useFloorPlan((s) => s.heatmap);
   const toggleHeatmap = useFloorPlan((s) => s.toggleHeatmap);
+  const collisionDetection = useFloorPlan((s) => s.collisionDetection);
+  const toggleCollision = useFloorPlan((s) => s.toggleCollision);
   const importPCs = useFloorPlan((s) => s.importPCs);
   const reset = useFloorPlan((s) => s.reset);
   const floors = useFloorPlan((s) => s.floors);
@@ -150,6 +152,12 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
               <Flame className="h-4 w-4" />
             </Button>
           </TooltipTrigger><TooltipContent>Heatmap</TooltipContent></Tooltip>
+
+          <Tooltip><TooltipTrigger asChild>
+            <Button size="icon" variant={collisionDetection ? "default" : "ghost"} onClick={toggleCollision}>
+              <ShieldAlert className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger><TooltipContent>Collision detection</TooltipContent></Tooltip>
 
           <Tooltip><TooltipTrigger asChild>
             <Button size="icon" variant="ghost" onClick={() => setHistoryOpen(true)}>
