@@ -150,6 +150,9 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
         ))}
       </div>
 
+      {/* Multi-select Alignment toolbar */}
+      <AlignmentToolbar />
+
       {/* Map Essentials Overlays */}
       {showLegend && <LegendCard />}
       {showCompass && <NorthArrow />}
