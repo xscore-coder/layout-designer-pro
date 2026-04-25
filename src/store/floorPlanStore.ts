@@ -702,6 +702,7 @@ export const useFloorPlan = create<Store>()(
         showLegend: s.showLegend,
         showCompass: s.showCompass,
         showScale: s.showScale,
+        collisionDetection: s.collisionDetection,
         theme: s.theme,
       }),
       onRehydrateStorage: () => (state) => {
