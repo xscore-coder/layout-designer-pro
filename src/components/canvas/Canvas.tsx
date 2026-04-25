@@ -161,7 +161,6 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
       <AlignmentToolbar />
 
       {/* Map Essentials Overlays */}
-      {showLegend && <LegendCard />}
       {showScale && <ScaleBar zoom={zoom} />}
 
       {/* Floor lock badge */}
