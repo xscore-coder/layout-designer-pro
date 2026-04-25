@@ -1,12 +1,17 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import { useActiveFloor, useFloorPlan } from "@/store/floorPlanStore";
 import { Zone } from "./Zone";
 import { Button } from "@/components/ui/button";
-import { ZoomIn, ZoomOut, Maximize } from "lucide-react";
+import { ZoomIn, ZoomOut, Maximize, Compass, Ruler } from "lucide-react";
 
 interface Props { searchQuery: string }
 
-export function Canvas({ searchQuery }: Props) {
+export interface CanvasHandle {
+  getStageEl: () => HTMLDivElement | null;
+  resetView: () => void;
+}
+
+export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQuery }, ref) {
   const floor = useActiveFloor();
   const zoom = useFloorPlan((s) => s.zoom);
   const setZoom = useFloorPlan((s) => s.setZoom);
@@ -15,11 +20,20 @@ export function Canvas({ searchQuery }: Props) {
   const selectedZoneId = useFloorPlan((s) => s.selectedZoneId);
   const undo = useFloorPlan((s) => s.undo);
   const redo = useFloorPlan((s) => s.redo);
+  const showCompass = useFloorPlan((s) => s.showCompass);
+  const showScale = useFloorPlan((s) => s.showScale);
+  const showLegend = useFloorPlan((s) => s.showLegend);
+  const theme = useFloorPlan((s) => s.theme);
   const containerRef = useRef<HTMLDivElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
   const [pan, setPan] = useState<{ ox: number; oy: number; sx: number; sy: number } | null>(null);
 
-  // Keyboard shortcuts
+  useImperativeHandle(ref, () => ({
+    getStageEl: () => stageRef.current,
+    resetView: () => { setZoom(1); setPanOffset({ x: 0, y: 0 }); },
+  }));
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
@@ -41,7 +55,6 @@ export function Canvas({ searchQuery }: Props) {
     return () => window.removeEventListener("keydown", handler);
   }, [undo, redo, selectedZoneId, removeZone]);
 
-  // Pan with middle mouse / space + drag (simplified: middle button)
   useEffect(() => {
     if (!pan) return;
     const onMove = (e: MouseEvent) => {
@@ -56,16 +69,26 @@ export function Canvas({ searchQuery }: Props) {
     };
   }, [pan]);
 
-  // compute heatmap max
   const heatmapMax = Math.max(
     1,
     ...floor.zones.flatMap((z) => z.seats.map((s) => s.problemCount))
   );
 
+  const otherZones = floor.zones.filter((z) => z.id !== selectedZoneId);
+
+  // Theme styling for canvas background
+  const themeBg: Record<string, string> = {
+    modern: "canvas-grid-bg",
+    blueprint: "canvas-grid-bg theme-blueprint",
+    corporate: "canvas-grid-bg theme-corporate",
+    minimal: "canvas-grid-bg theme-minimal",
+    darkpro: "canvas-grid-bg theme-darkpro",
+  };
+
   return (
     <div
       ref={containerRef}
-      className="relative flex-1 overflow-hidden canvas-grid-bg"
+      className={`relative flex-1 overflow-hidden ${themeBg[theme] ?? "canvas-grid-bg"}`}
       onMouseDown={(e) => {
         if (e.button === 1 || (e.button === 0 && e.altKey)) {
           e.preventDefault();
@@ -82,6 +105,7 @@ export function Canvas({ searchQuery }: Props) {
       }}
     >
       <div
+        ref={stageRef}
         className="absolute origin-top-left"
         style={{
           transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoom})`,
@@ -96,12 +120,18 @@ export function Canvas({ searchQuery }: Props) {
             searchQuery={searchQuery}
             zoom={zoom}
             heatmapMax={heatmapMax}
+            otherZones={otherZones}
           />
         ))}
       </div>
 
+      {/* Map Essentials Overlays */}
+      {showLegend && <LegendCard />}
+      {showCompass && <NorthArrow />}
+      {showScale && <ScaleBar zoom={zoom} />}
+
       {/* Zoom controls */}
-      <div className="absolute bottom-4 right-4 flex flex-col gap-1 bg-card/90 backdrop-blur rounded-lg shadow-md border border-border p-1">
+      <div className="absolute bottom-4 right-4 flex flex-col gap-1 bg-card/90 backdrop-blur rounded-lg shadow-md border border-border p-1 print:hidden">
         <Button size="icon" variant="ghost" onClick={() => setZoom(zoom + 0.1)}>
           <ZoomIn className="h-4 w-4" />
         </Button>
@@ -127,6 +157,72 @@ export function Canvas({ searchQuery }: Props) {
           </div>
         </div>
       )}
+    </div>
+  );
+});
+
+function LegendCard() {
+  const items = [
+    { color: "hsl(var(--seat-agent))", label: "Agent" },
+    { color: "hsl(var(--seat-leader))", label: "Leader" },
+    { color: "hsl(var(--seat-super))", label: "Supervisor" },
+    { color: "hsl(var(--seat-problem))", label: "Problem" },
+    { color: "hsl(var(--seat-empty))", label: "Empty" },
+  ];
+  const shifts = [
+    { color: "hsl(38 92% 50%)", label: "Morning" },
+    { color: "hsl(271 76% 53%)", label: "Evening" },
+    { color: "hsl(217 91% 50%)", label: "Night" },
+  ];
+  return (
+    <div className="absolute top-4 right-4 bg-card/95 backdrop-blur rounded-lg shadow-md border border-border p-3 text-[11px] min-w-[140px]">
+      <div className="font-bold uppercase tracking-wider text-[10px] text-muted-foreground mb-2">Legend</div>
+      <div className="space-y-1">
+        {items.map((i) => (
+          <div key={i.label} className="flex items-center gap-2">
+            <span className="h-3 w-3 rounded-sm" style={{ backgroundColor: i.color }} />
+            <span>{i.label}</span>
+          </div>
+        ))}
+      </div>
+      <div className="mt-2 pt-2 border-t border-border">
+        <div className="font-bold uppercase tracking-wider text-[10px] text-muted-foreground mb-1">Shifts</div>
+        {shifts.map((s) => (
+          <div key={s.label} className="flex items-center gap-2 mt-0.5">
+            <span className="h-2 w-2 rounded-full" style={{ backgroundColor: s.color }} />
+            <span>{s.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function NorthArrow() {
+  return (
+    <div className="absolute top-4 left-4 bg-card/95 backdrop-blur rounded-full shadow-md border border-border h-14 w-14 flex flex-col items-center justify-center">
+      <Compass className="h-3 w-3 text-muted-foreground absolute top-1" />
+      <div className="text-[8px] text-muted-foreground absolute top-3.5">N</div>
+      <svg viewBox="0 0 40 40" className="h-10 w-10">
+        <polygon points="20,6 26,28 20,22 14,28" fill="hsl(var(--destructive))" />
+        <polygon points="20,34 14,28 20,22 26,28" fill="hsl(var(--muted-foreground) / 0.5)" />
+      </svg>
+    </div>
+  );
+}
+
+function ScaleBar({ zoom }: { zoom: number }) {
+  // 100px on canvas at zoom=1 represents arbitrary scale: 1m
+  const width = 100 * zoom;
+  return (
+    <div className="absolute bottom-4 left-4 bg-card/95 backdrop-blur rounded-md shadow-sm border border-border px-3 py-1.5 flex items-center gap-2">
+      <Ruler className="h-3 w-3 text-muted-foreground" />
+      <div>
+        <div className="flex items-end h-3" style={{ width: `${Math.max(40, width)}px` }}>
+          <div className="flex-1 border-l-2 border-r-2 border-b-2 border-foreground/70 h-2" />
+        </div>
+        <div className="text-[9px] font-mono text-muted-foreground text-center mt-0.5">1 m</div>
+      </div>
     </div>
   );
 }
