@@ -66,8 +66,21 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
   const groupSelected = useFloorPlan((s) => s.groupSelectedAsSpace);
   const selectedZoneIds = useFloorPlan((s) => s.selectedZoneIds);
   const saveVersion = useFloorPlan((s) => s.saveVersion);
+  const ensureDailySnapshot = useFloorPlan((s) => s.ensureDailySnapshot);
   const activeFloorId = useFloorPlan((s) => s.activeFloorId);
   const updateFloor = useFloorPlan((s) => s.updateFloor);
+
+  // Daily auto-snapshot on app load (one per calendar day)
+  useEffect(() => {
+    const t = setTimeout(() => {
+      try {
+        if (ensureDailySnapshot()) {
+          toast.success("Daily snapshot saved", { description: new Date().toLocaleDateString() });
+        }
+      } catch { /* ignore */ }
+    }, 800);
+    return () => clearTimeout(t);
+  }, [ensureDailySnapshot]);
 
   const exportJSON = () => {
     const blob = new Blob([JSON.stringify({ floors }, null, 2)], { type: "application/json" });
@@ -102,15 +115,19 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
       header: true,
       skipEmptyLines: true,
       complete: (res) => {
-        const rows = (res.data as Record<string, string>[]).map((r) => {
+        const rows: IncomingRow[] = (res.data as Record<string, string>[]).map((r) => {
           const pc = r.pc ?? r.PC ?? r.pc_number ?? r["PC Number"] ?? r.computer ?? Object.values(r)[0];
           const problems = parseInt(r.problems ?? r.Problems ?? r.issues ?? "0", 10) || 0;
           const agent = r.agent ?? r.Agent ?? r.name ?? r.Name;
-          const shift = (r.shift ?? r.Shift)?.toLowerCase() as any;
+          const shift = (r.shift ?? r.Shift)?.toLowerCase();
           return { pc: String(pc).trim(), problems, agent, shift };
         }).filter((r) => r.pc);
-        importPCs(rows);
-        toast.success(`Imported ${rows.length} rows`);
+        if (!rows.length) {
+          toast.error("No valid rows found in CSV");
+          return;
+        }
+        setPendingRows(rows);
+        setMergeImportOpen(true);
       },
       error: () => toast.error("Failed to parse CSV"),
     });
