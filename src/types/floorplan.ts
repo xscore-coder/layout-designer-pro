@@ -17,6 +17,8 @@ export interface Seat {
   type: SeatType;
   note?: string;
   waslaSctFeedback?: string;
+  /** Manual last update date (e.g. "2026-04-26") entered by the user */
+  lastUpdate?: string;
   problemCount: number;
   history: PCHistoryEntry[];
   /** When true, seat fields cannot be edited until unlocked */
