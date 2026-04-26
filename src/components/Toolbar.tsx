@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -17,6 +17,7 @@ import { PrintDialog } from "./dialogs/PrintDialog";
 import { VersionsDialog } from "./dialogs/VersionsDialog";
 import { TemplatesDialog } from "./dialogs/TemplatesDialog";
 import { DashboardDialog } from "./dialogs/DashboardDialog";
+import { ImportMergeDialog, type IncomingRow } from "./dialogs/ImportMergeDialog";
 import { ThemePicker } from "./ThemePicker";
 import { toast } from "sonner";
 import Papa from "papaparse";
@@ -45,6 +46,8 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
   const [dashboardOpen, setDashboardOpen] = useState(false);
   const [clearOpen, setClearOpen] = useState(false);
   const [clearConfirmText, setClearConfirmText] = useState("");
+  const [mergeImportOpen, setMergeImportOpen] = useState(false);
+  const [pendingRows, setPendingRows] = useState<IncomingRow[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
   const jsonRef = useRef<HTMLInputElement>(null);
 
@@ -56,15 +59,28 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
   const toggleHeatmap = useFloorPlan((s) => s.toggleHeatmap);
   const collisionDetection = useFloorPlan((s) => s.collisionDetection);
   const toggleCollision = useFloorPlan((s) => s.toggleCollision);
-  const importPCs = useFloorPlan((s) => s.importPCs);
+  // importPCs handled via Smart-Merge dialog (importPCsSelective)
   const reset = useFloorPlan((s) => s.reset);
   const floors = useFloorPlan((s) => s.floors);
   const loadJSON = useFloorPlan((s) => s.loadFromJSON);
   const groupSelected = useFloorPlan((s) => s.groupSelectedAsSpace);
   const selectedZoneIds = useFloorPlan((s) => s.selectedZoneIds);
   const saveVersion = useFloorPlan((s) => s.saveVersion);
+  const ensureDailySnapshot = useFloorPlan((s) => s.ensureDailySnapshot);
   const activeFloorId = useFloorPlan((s) => s.activeFloorId);
   const updateFloor = useFloorPlan((s) => s.updateFloor);
+
+  // Daily auto-snapshot on app load (one per calendar day)
+  useEffect(() => {
+    const t = setTimeout(() => {
+      try {
+        if (ensureDailySnapshot()) {
+          toast.success("Daily snapshot saved", { description: new Date().toLocaleDateString() });
+        }
+      } catch { /* ignore */ }
+    }, 800);
+    return () => clearTimeout(t);
+  }, [ensureDailySnapshot]);
 
   const exportJSON = () => {
     const blob = new Blob([JSON.stringify({ floors }, null, 2)], { type: "application/json" });
@@ -99,15 +115,19 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
       header: true,
       skipEmptyLines: true,
       complete: (res) => {
-        const rows = (res.data as Record<string, string>[]).map((r) => {
+        const rows: IncomingRow[] = (res.data as Record<string, string>[]).map((r) => {
           const pc = r.pc ?? r.PC ?? r.pc_number ?? r["PC Number"] ?? r.computer ?? Object.values(r)[0];
           const problems = parseInt(r.problems ?? r.Problems ?? r.issues ?? "0", 10) || 0;
           const agent = r.agent ?? r.Agent ?? r.name ?? r.Name;
-          const shift = (r.shift ?? r.Shift)?.toLowerCase() as any;
+          const shift = (r.shift ?? r.Shift)?.toLowerCase();
           return { pc: String(pc).trim(), problems, agent, shift };
         }).filter((r) => r.pc);
-        importPCs(rows);
-        toast.success(`Imported ${rows.length} rows`);
+        if (!rows.length) {
+          toast.error("No valid rows found in CSV");
+          return;
+        }
+        setPendingRows(rows);
+        setMergeImportOpen(true);
       },
       error: () => toast.error("Failed to parse CSV"),
     });
@@ -273,6 +293,11 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
       <VersionsDialog open={versionsOpen} onOpenChange={setVersionsOpen} />
       <TemplatesDialog open={templatesOpen} onOpenChange={setTemplatesOpen} />
       <DashboardDialog open={dashboardOpen} onOpenChange={setDashboardOpen} />
+      <ImportMergeDialog
+        open={mergeImportOpen}
+        onOpenChange={setMergeImportOpen}
+        rows={pendingRows}
+      />
 
       {/* Clear Grid confirmation */}
       {(() => {

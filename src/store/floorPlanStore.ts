@@ -72,6 +72,8 @@ interface Store extends FloorPlanState {
   saveVersion: (label?: string) => void;
   restoreVersion: (id: string) => void;
   removeVersion: (id: string) => void;
+  /** Save one version per day (idempotent). Returns true if a new version was saved. */
+  ensureDailySnapshot: () => boolean;
 
   // palette
   addPaletteColor: (hsl: string) => void;
@@ -122,6 +124,11 @@ interface Store extends FloorPlanState {
 
   // import
   importPCs: (rows: { pc: string; problems?: number; agent?: string; shift?: Shift }[]) => void;
+  /** Smart-merge: only applies to selected PCs (by pcNumber). */
+  importPCsSelective: (
+    rows: { pc: string; problems?: number; agent?: string; shift?: Shift }[],
+    selectedPcs: string[]
+  ) => void;
 
   // undo/redo
   undo: () => void;
@@ -686,6 +693,46 @@ export const useFloorPlan = create<Store>()(
           });
         }),
 
+      importPCsSelective: (rows, selectedPcs) =>
+        set((s) => {
+          const allowed = new Set(selectedPcs);
+          const map = new Map(rows.filter((r) => allowed.has(r.pc)).map((r) => [r.pc, r]));
+          let updated = 0;
+          const floors = s.floors.map((f) => ({
+            ...f,
+            zones: f.zones.map((z) => ({
+              ...z,
+              seats: z.seats.map((seat) => {
+                const r = map.get(seat.pcNumber);
+                if (!r) return seat;
+                updated++;
+                const problems = r.problems ?? 0;
+                return {
+                  ...seat,
+                  problemCount: seat.problemCount + problems,
+                  type: problems > 0 ? "problem" : seat.type,
+                  history:
+                    problems > 0
+                      ? [
+                          {
+                            id: uid(),
+                            date: new Date().toISOString(),
+                            type: "problem" as const,
+                            description: `Imported (merge): ${problems} problem(s)`,
+                          },
+                          ...seat.history,
+                        ].slice(0, 50)
+                      : seat.history,
+                };
+              }),
+            })),
+          }));
+          return withHistory(s, {
+            floors,
+            changeLog: log(s, "Smart-merge import", `${updated} PCs updated`),
+          });
+        }),
+
       undo: () =>
         set((s) => {
           if (!s.past.length) return {};
@@ -829,6 +876,26 @@ export const useFloorPlan = create<Store>()(
 
       removeVersion: (id) =>
         set((s) => ({ versions: s.versions.filter((v) => v.id !== id) })),
+
+      ensureDailySnapshot: () => {
+        const today = new Date().toISOString().slice(0, 10);
+        const tag = `Daily ${today}`;
+        const s = get();
+        if (s.versions.some((v) => v.label === tag)) return false;
+        set((st) => ({
+          versions: [
+            {
+              id: uid(),
+              date: new Date().toISOString(),
+              label: tag,
+              data: { floors: JSON.parse(JSON.stringify(st.floors)) },
+            },
+            ...st.versions,
+          ].slice(0, 60),
+          changeLog: log(st, "Daily auto-snapshot", tag),
+        }));
+        return true;
+      },
 
       // ===== Custom Palette =====
       addPaletteColor: (hsl) =>
