@@ -693,6 +693,46 @@ export const useFloorPlan = create<Store>()(
           });
         }),
 
+      importPCsSelective: (rows, selectedPcs) =>
+        set((s) => {
+          const allowed = new Set(selectedPcs);
+          const map = new Map(rows.filter((r) => allowed.has(r.pc)).map((r) => [r.pc, r]));
+          let updated = 0;
+          const floors = s.floors.map((f) => ({
+            ...f,
+            zones: f.zones.map((z) => ({
+              ...z,
+              seats: z.seats.map((seat) => {
+                const r = map.get(seat.pcNumber);
+                if (!r) return seat;
+                updated++;
+                const problems = r.problems ?? 0;
+                return {
+                  ...seat,
+                  problemCount: seat.problemCount + problems,
+                  type: problems > 0 ? "problem" : seat.type,
+                  history:
+                    problems > 0
+                      ? [
+                          {
+                            id: uid(),
+                            date: new Date().toISOString(),
+                            type: "problem" as const,
+                            description: `Imported (merge): ${problems} problem(s)`,
+                          },
+                          ...seat.history,
+                        ].slice(0, 50)
+                      : seat.history,
+                };
+              }),
+            })),
+          }));
+          return withHistory(s, {
+            floors,
+            changeLog: log(s, "Smart-merge import", `${updated} PCs updated`),
+          });
+        }),
+
       undo: () =>
         set((s) => {
           if (!s.past.length) return {};
