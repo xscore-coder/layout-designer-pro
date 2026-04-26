@@ -130,7 +130,7 @@ export function ImportMergeDialog({ open, onOpenChange, rows }: Props) {
       toast.error("No rows selected");
       return;
     }
-    importPCsSelective(rows, Array.from(selected));
+    importPCsSelective(rows as any, Array.from(selected));
     toast.success(`Merged ${selected.size} PCs`);
     onOpenChange(false);
   };
