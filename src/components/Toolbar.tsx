@@ -76,19 +76,20 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
   };
 
   const exportExcel = () => {
-    const rows = [["Floor", "Zone", "PC", "Lock Number", "Type", "Problems", "Notes", "Wasla SCT Feedback"]];
+    const rows = [["Floor", "Zone", "PC", "Lock Number", "Type", "Problems", "Notes", "Wasla SCT Feedback", "Last Update"]];
     floors.forEach((f) => f.zones.forEach((z) => z.kind === "zone" && z.seats.forEach((s) => {
       rows.push([
         f.name, z.name, s.pcNumber, s.lockNumber ?? "", s.type,
-        String(s.problemCount), s.note ?? "", s.waslaSctFeedback ?? "",
+        String(s.problemCount), s.note ?? "", s.waslaSctFeedback ?? "", s.lastUpdate ?? "",
       ]);
     })));
     const csv = Papa.unparse(rows);
     // UTF-8 BOM so Excel renders Arabic correctly
     const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
+    const today = new Date().toISOString().slice(0, 10);
     const a = document.createElement("a");
-    a.href = url; a.download = `seats-${Date.now()}.csv`; a.click();
+    a.href = url; a.download = `PC Problem - ${today}.csv`; a.click();
     URL.revokeObjectURL(url);
     toast.success("Exported CSV");
   };
