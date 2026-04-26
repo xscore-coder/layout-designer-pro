@@ -72,6 +72,8 @@ interface Store extends FloorPlanState {
   saveVersion: (label?: string) => void;
   restoreVersion: (id: string) => void;
   removeVersion: (id: string) => void;
+  /** Save one version per day (idempotent). Returns true if a new version was saved. */
+  ensureDailySnapshot: () => boolean;
 
   // palette
   addPaletteColor: (hsl: string) => void;
@@ -122,6 +124,11 @@ interface Store extends FloorPlanState {
 
   // import
   importPCs: (rows: { pc: string; problems?: number; agent?: string; shift?: Shift }[]) => void;
+  /** Smart-merge: only applies to selected PCs (by pcNumber). */
+  importPCsSelective: (
+    rows: { pc: string; problems?: number; agent?: string; shift?: Shift }[],
+    selectedPcs: string[]
+  ) => void;
 
   // undo/redo
   undo: () => void;
@@ -829,6 +836,26 @@ export const useFloorPlan = create<Store>()(
 
       removeVersion: (id) =>
         set((s) => ({ versions: s.versions.filter((v) => v.id !== id) })),
+
+      ensureDailySnapshot: () => {
+        const today = new Date().toISOString().slice(0, 10);
+        const tag = `Daily ${today}`;
+        const s = get();
+        if (s.versions.some((v) => v.label === tag)) return false;
+        set((st) => ({
+          versions: [
+            {
+              id: uid(),
+              date: new Date().toISOString(),
+              label: tag,
+              data: { floors: JSON.parse(JSON.stringify(st.floors)) },
+            },
+            ...st.versions,
+          ].slice(0, 60),
+          changeLog: log(st, "Daily auto-snapshot", tag),
+        }));
+        return true;
+      },
 
       // ===== Custom Palette =====
       addPaletteColor: (hsl) =>
