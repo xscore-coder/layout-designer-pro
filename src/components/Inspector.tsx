@@ -316,6 +316,45 @@ export function Inspector() {
 
                     <div>
                       <div className="flex items-center justify-between mb-1">
+                        <Label>Last Update</Label>
+                        <div className="flex items-center gap-1">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-6 px-2 text-xs"
+                            onClick={() => {
+                              const today = new Date().toISOString().slice(0, 10);
+                              updateSeat(zone.id, seat.id, { lastUpdate: today });
+                              toast.success("Set to today");
+                            }}
+                          >
+                            Today
+                          </Button>
+                          {seat.lastUpdate && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-6 px-2 text-xs text-muted-foreground hover:text-destructive"
+                              onClick={() => {
+                                updateSeat(zone.id, seat.id, { lastUpdate: "" });
+                                toast.success("Cleared");
+                              }}
+                            >
+                              <X className="h-3 w-3 mr-1" /> Clear
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                      <Input
+                        dir="auto"
+                        value={seat.lastUpdate ?? ""}
+                        onChange={(e) => updateSeat(zone.id, seat.id, { lastUpdate: e.target.value })}
+                        placeholder="e.g. 2026-04-26 أو أي تاريخ"
+                      />
+                    </div>
+
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
                         <Label>Wasla SCT Feedback</Label>
                         {seat.waslaSctFeedback && (
                           <Button
