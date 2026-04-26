@@ -12,9 +12,25 @@ import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { ColorPicker } from "./ColorPicker";
 import {
-  Lock, Unlock, Copy, Trash2, Plus, AlertTriangle, Info, Ungroup, X, ShieldCheck,
+  Lock, Unlock, Copy, Trash2, Plus, AlertTriangle, Info, Ungroup, X, ShieldCheck, Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
+
+/** Shared quick-pick note templates (Arabic + English mix). */
+const NOTE_TEMPLATES = [
+  "شاشة لا تعمل",
+  "كيبورد بايظ",
+  "ماوس مش شغالة",
+  "السماعة بايظة",
+  "محتاج فورمات",
+  "النت مفصول",
+  "الجهاز بطيء جداً",
+  "محتاج RAM",
+  "هارد بايظ",
+  "تم الإصلاح ✓",
+  "Needs replacement",
+  "Under maintenance",
+];
 
 export function Inspector() {
   const floor = useActiveFloor();
