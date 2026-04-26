@@ -307,26 +307,50 @@ export function Inspector() {
                     <div>
                       <div className="flex items-center justify-between mb-1">
                         <Label>Note</Label>
-                        {seat.note && (
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="h-6 px-2 text-xs text-muted-foreground hover:text-destructive"
-                            onClick={() => {
-                              updateSeat(zone.id, seat.id, { note: "" });
-                              toast.success("Note cleared");
+                        <div className="flex items-center gap-1">
+                          <Select
+                            value=""
+                            onValueChange={(tpl) => {
+                              if (!tpl) return;
+                              const current = seat.note?.trim() ?? "";
+                              const next = current ? `${current}\n${tpl}` : tpl;
+                              updateSeat(zone.id, seat.id, { note: next });
+                              toast.success("Template added");
                             }}
                           >
-                            <X className="h-3 w-3 mr-1" /> Clear
-                          </Button>
-                        )}
+                            <SelectTrigger className="h-6 px-2 text-xs w-auto gap-1 border-0 bg-transparent hover:bg-muted">
+                              <Sparkles className="h-3 w-3" />
+                              <span>Templates</span>
+                            </SelectTrigger>
+                            <SelectContent align="end" className="max-h-64">
+                              {NOTE_TEMPLATES.map((tpl) => (
+                                <SelectItem key={tpl} value={tpl} dir="auto">
+                                  {tpl}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          {seat.note && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-6 px-2 text-xs text-muted-foreground hover:text-destructive"
+                              onClick={() => {
+                                updateSeat(zone.id, seat.id, { note: "" });
+                                toast.success("Note cleared");
+                              }}
+                            >
+                              <X className="h-3 w-3 mr-1" /> Clear
+                            </Button>
+                          )}
+                        </div>
                       </div>
                       <Textarea
                         rows={2}
                         dir="auto"
                         value={seat.note ?? ""}
                         onChange={(e) => updateSeat(zone.id, seat.id, { note: e.target.value })}
-                        placeholder="ملاحظات…"
+                        placeholder="ملاحظات… أو اختر من Templates"
                       />
                     </div>
 
