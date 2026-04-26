@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -17,6 +17,7 @@ import { PrintDialog } from "./dialogs/PrintDialog";
 import { VersionsDialog } from "./dialogs/VersionsDialog";
 import { TemplatesDialog } from "./dialogs/TemplatesDialog";
 import { DashboardDialog } from "./dialogs/DashboardDialog";
+import { ImportMergeDialog, type IncomingRow } from "./dialogs/ImportMergeDialog";
 import { ThemePicker } from "./ThemePicker";
 import { toast } from "sonner";
 import Papa from "papaparse";
@@ -45,6 +46,8 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
   const [dashboardOpen, setDashboardOpen] = useState(false);
   const [clearOpen, setClearOpen] = useState(false);
   const [clearConfirmText, setClearConfirmText] = useState("");
+  const [mergeImportOpen, setMergeImportOpen] = useState(false);
+  const [pendingRows, setPendingRows] = useState<IncomingRow[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
   const jsonRef = useRef<HTMLInputElement>(null);
 
