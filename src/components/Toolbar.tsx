@@ -59,7 +59,7 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
   const toggleHeatmap = useFloorPlan((s) => s.toggleHeatmap);
   const collisionDetection = useFloorPlan((s) => s.collisionDetection);
   const toggleCollision = useFloorPlan((s) => s.toggleCollision);
-  const importPCs = useFloorPlan((s) => s.importPCs);
+  // importPCs handled via Smart-Merge dialog (importPCsSelective)
   const reset = useFloorPlan((s) => s.reset);
   const floors = useFloorPlan((s) => s.floors);
   const loadJSON = useFloorPlan((s) => s.loadFromJSON);
@@ -293,6 +293,11 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
       <VersionsDialog open={versionsOpen} onOpenChange={setVersionsOpen} />
       <TemplatesDialog open={templatesOpen} onOpenChange={setTemplatesOpen} />
       <DashboardDialog open={dashboardOpen} onOpenChange={setDashboardOpen} />
+      <ImportMergeDialog
+        open={mergeImportOpen}
+        onOpenChange={setMergeImportOpen}
+        rows={pendingRows}
+      />
 
       {/* Clear Grid confirmation */}
       {(() => {
