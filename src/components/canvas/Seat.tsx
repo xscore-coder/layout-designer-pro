@@ -26,6 +26,7 @@ export function Seat({ seat, zone, highlighted, heatmapMax }: Props) {
   const cycle = useFloorPlan((s) => s.cycleSeatType);
   const select = useFloorPlan((s) => s.selectSeat);
   const selected = useFloorPlan((s) => s.selectedSeatId === seat.id);
+  const inMultiSelection = useFloorPlan((s) => s.selectedSeatIds.includes(seat.id));
   const heatmap = useFloorPlan((s) => s.heatmap);
 
   const Icon = ICONS[seat.type] ?? MinusCircle;
@@ -42,8 +43,11 @@ export function Seat({ seat, zone, highlighted, heatmapMax }: Props) {
       type="button"
       onClick={(e) => {
         e.stopPropagation();
-        if (e.shiftKey || e.metaKey) {
-          select(seat.id);
+        const additive = e.metaKey || e.ctrlKey;
+        const range = e.shiftKey;
+        if (additive || range) {
+          // Multi-select mode — DON'T cycle, just toggle/extend selection
+          select(seat.id, { additive, range });
         } else {
           if (!seat.locked) cycle(zone.id, seat.id);
           select(seat.id);
@@ -54,12 +58,13 @@ export function Seat({ seat, zone, highlighted, heatmapMax }: Props) {
         e.stopPropagation();
         select(seat.id);
       }}
-      title={`PC ${seat.pcNumber}${seat.lockNumber ? ` • Lock ${seat.lockNumber}` : ""}${seat.locked ? " • 🔒 Locked" : ""}${seat.problemCount ? ` • ${seat.problemCount} issue(s)` : ""}`}
+      title={`PC ${seat.pcNumber}${seat.lockNumber ? ` • Lock ${seat.lockNumber}` : ""}${seat.locked ? " • 🔒 Locked" : ""}${seat.problemCount ? ` • ${seat.problemCount} issue(s)` : ""}\n(Ctrl/Cmd-click = multi-select • Shift-click = range)`}
       className={cn(
         "relative h-9 w-9 rounded-md flex items-center justify-center text-[10px] font-semibold transition-all",
         "hover:scale-110 hover:z-10 hover:shadow-md",
         TYPE_BG[seat.type] ?? TYPE_BG.empty,
         selected && "ring-2 ring-ring ring-offset-1 ring-offset-card",
+        inMultiSelection && !selected && "ring-2 ring-accent ring-offset-1 ring-offset-card",
         highlighted && "ring-2 ring-warning",
         seat.locked && "outline outline-1 outline-amber-400/70"
       )}
