@@ -125,7 +125,7 @@ export function AddSpaceDialog({ open, onOpenChange }: Props) {
                   );
                 })}
               </div>
-            </ScrollArea>
+            </div>
           </div>
 
           {/* Size presets */}
