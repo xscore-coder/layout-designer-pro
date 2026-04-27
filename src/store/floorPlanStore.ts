@@ -102,7 +102,14 @@ interface Store extends FloorPlanState {
   selectZone: (id: string | null, opts?: { additive?: boolean }) => void;
   selectMany: (ids: string[]) => void;
   clearSelection: () => void;
-  selectSeat: (id: string | null) => void;
+  selectSeat: (id: string | null, opts?: { additive?: boolean; range?: boolean }) => void;
+  selectSeats: (ids: string[]) => void;
+  clearSeatSelection: () => void;
+  /** Apply a partial Seat patch to every selected seat across all zones */
+  bulkUpdateSelectedSeats: (patch: Partial<Seat>) => void;
+  bulkSetSelectedSeatType: (type: SeatType) => void;
+  /** Select every zone on the active floor */
+  selectAllZonesOnActiveFloor: () => void;
   setZoom: (z: number) => void;
   toggleDark: () => void;
   toggleHeatmap: () => void;
