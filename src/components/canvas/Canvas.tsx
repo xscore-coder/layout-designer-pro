@@ -4,6 +4,7 @@ import { Zone } from "./Zone";
 import { Button } from "@/components/ui/button";
 import { ZoomIn, ZoomOut, Maximize, Ruler, Lock } from "lucide-react";
 import { AlignmentToolbar } from "@/components/AlignmentToolbar";
+import { BulkSeatActions } from "@/components/BulkSeatActions";
 
 interface Props { searchQuery: string }
 
@@ -17,7 +18,9 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
   const zoom = useFloorPlan((s) => s.zoom);
   const setZoom = useFloorPlan((s) => s.setZoom);
   const selectZone = useFloorPlan((s) => s.selectZone);
+  const selectMany = useFloorPlan((s) => s.selectMany);
   const clearSelection = useFloorPlan((s) => s.clearSelection);
+  const selectAll = useFloorPlan((s) => s.selectAllZonesOnActiveFloor);
   const removeZone = useFloorPlan((s) => s.removeZone);
   const selectedZoneId = useFloorPlan((s) => s.selectedZoneId);
   const selectedZoneIds = useFloorPlan((s) => s.selectedZoneIds);
@@ -34,6 +37,8 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
   const stageRef = useRef<HTMLDivElement>(null);
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
   const [pan, setPan] = useState<{ ox: number; oy: number; sx: number; sy: number } | null>(null);
+  // Lasso (marquee) selection — coordinates are in canvas (stage) space
+  const [lasso, setLasso] = useState<{ x0: number; y0: number; x1: number; y1: number; additive: boolean } | null>(null);
 
   useImperativeHandle(ref, () => ({
     getStageEl: () => stageRef.current,
@@ -60,6 +65,9 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
           e.preventDefault();
           groupSelected();
         }
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "a") {
+        e.preventDefault();
+        selectAll();
       } else if (e.key === "Escape") {
         clearSelection();
       } else if (e.key === "Delete" || e.key === "Backspace") {
@@ -78,7 +86,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [undo, redo, selectedZoneId, selectedZoneIds, removeZone, moveSelectedBy, clearSelection, duplicateZone, groupSelected]);
+  }, [undo, redo, selectedZoneId, selectedZoneIds, removeZone, moveSelectedBy, clearSelection, duplicateZone, groupSelected, selectAll]);
 
   useEffect(() => {
     if (!pan) return;
@@ -93,6 +101,48 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
       window.removeEventListener("mouseup", onUp);
     };
   }, [pan]);
+
+  // ===== Lasso (marquee) selection =====
+  useEffect(() => {
+    if (!lasso) return;
+    const stage = stageRef.current;
+    if (!stage) return;
+    const rect = stage.getBoundingClientRect();
+    const onMove = (e: MouseEvent) => {
+      // convert client coords to stage (canvas) coords
+      const x = (e.clientX - rect.left) / zoom;
+      const y = (e.clientY - rect.top) / zoom;
+      setLasso((l) => (l ? { ...l, x1: x, y1: y } : l));
+    };
+    const onUp = () => {
+      setLasso((l) => {
+        if (!l) return null;
+        const x = Math.min(l.x0, l.x1);
+        const y = Math.min(l.y0, l.y1);
+        const w = Math.abs(l.x1 - l.x0);
+        const h = Math.abs(l.y1 - l.y0);
+        // Tiny drag = treat as click → keep selection cleared
+        if (w < 4 && h < 4) {
+          if (!l.additive) clearSelection();
+          return null;
+        }
+        const hits = floor.zones
+          .filter((z) => !z.hidden && z.x < x + w && z.x + z.width > x && z.y < y + h && z.y + z.height > y)
+          .map((z) => z.id);
+        const finalIds = l.additive
+          ? Array.from(new Set([...selectedZoneIds, ...hits]))
+          : hits;
+        selectMany(finalIds);
+        return null;
+      });
+    };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+  }, [lasso, zoom, floor.zones, selectedZoneIds, selectMany, clearSelection]);
 
   const heatmapMax = Math.max(
     1,
@@ -119,9 +169,12 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
         if (e.button === 1 || (e.button === 0 && e.altKey)) {
           e.preventDefault();
           setPan({ ox: e.clientX, oy: e.clientY, sx: panOffset.x, sy: panOffset.y });
-        } else if (e.target === e.currentTarget || (e.target as HTMLElement).closest("[data-canvas-stage]") === stageRef.current && e.target === stageRef.current) {
+        } else if (e.target === e.currentTarget) {
+          // Click outside the stage entirely
           clearSelection();
         }
+        // NOTE: clicking on empty stage area is now handled by the inner
+        // stage onMouseDown which starts a lasso (marquee) selection.
       }}
       onWheel={(e) => {
         if (e.ctrlKey || e.metaKey) {
@@ -134,8 +187,14 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
         ref={stageRef}
         data-canvas-stage
         onMouseDown={(e) => {
+          // Only initiate lasso when clicking the stage background (not a zone/seat)
           if (e.target === e.currentTarget && e.button === 0 && !e.altKey) {
-            clearSelection();
+            const rect = stageRef.current!.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / zoom;
+            const y = (e.clientY - rect.top) / zoom;
+            const additive = e.shiftKey || e.metaKey || e.ctrlKey;
+            setLasso({ x0: x, y0: y, x1: x, y1: y, additive });
+            if (!additive) clearSelection();
           }
         }}
         className="absolute origin-top-left"
@@ -155,7 +214,23 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
             otherZones={otherZones}
           />
         ))}
+
+        {/* Lasso (marquee) rectangle — drawn in stage (canvas) coordinates */}
+        {lasso && (
+          <div
+            className="absolute pointer-events-none border-2 border-primary bg-primary/10 rounded-sm z-50"
+            style={{
+              left: Math.min(lasso.x0, lasso.x1),
+              top: Math.min(lasso.y0, lasso.y1),
+              width: Math.abs(lasso.x1 - lasso.x0),
+              height: Math.abs(lasso.y1 - lasso.y0),
+            }}
+          />
+        )}
       </div>
+
+      {/* Bulk seat actions bar (shown when 2+ seats selected) */}
+      <BulkSeatActions />
 
       {/* Multi-select Alignment toolbar */}
       <AlignmentToolbar />

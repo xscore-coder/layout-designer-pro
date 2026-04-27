@@ -102,7 +102,14 @@ interface Store extends FloorPlanState {
   selectZone: (id: string | null, opts?: { additive?: boolean }) => void;
   selectMany: (ids: string[]) => void;
   clearSelection: () => void;
-  selectSeat: (id: string | null) => void;
+  selectSeat: (id: string | null, opts?: { additive?: boolean; range?: boolean }) => void;
+  selectSeats: (ids: string[]) => void;
+  clearSeatSelection: () => void;
+  /** Apply a partial Seat patch to every selected seat across all zones */
+  bulkUpdateSelectedSeats: (patch: Partial<Seat>) => void;
+  bulkSetSelectedSeatType: (type: SeatType) => void;
+  /** Select every zone on the active floor */
+  selectAllZonesOnActiveFloor: () => void;
   setZoom: (z: number) => void;
   toggleDark: () => void;
   toggleHeatmap: () => void;
@@ -165,6 +172,7 @@ export const useFloorPlan = create<Store>()(
       selectedZoneId: null,
       selectedZoneIds: [],
       selectedSeatId: null,
+      selectedSeatIds: [],
       darkMode: false,
       heatmap: false,
       zoom: 1,
@@ -503,17 +511,105 @@ export const useFloorPlan = create<Store>()(
 
       selectZone: (id, opts) =>
         set((s) => {
-          if (id === null) return { selectedZoneId: null, selectedZoneIds: [], selectedSeatId: null };
+          if (id === null) return { selectedZoneId: null, selectedZoneIds: [], selectedSeatId: null, selectedSeatIds: [] };
           if (opts?.additive) {
             const exists = s.selectedZoneIds.includes(id);
             const ids = exists ? s.selectedZoneIds.filter((x) => x !== id) : [...s.selectedZoneIds, id];
-            return { selectedZoneIds: ids, selectedZoneId: ids[ids.length - 1] ?? null, selectedSeatId: null };
+            return { selectedZoneIds: ids, selectedZoneId: ids[ids.length - 1] ?? null, selectedSeatId: null, selectedSeatIds: [] };
           }
-          return { selectedZoneId: id, selectedZoneIds: [id], selectedSeatId: null };
+          return { selectedZoneId: id, selectedZoneIds: [id], selectedSeatId: null, selectedSeatIds: [] };
         }),
       selectMany: (ids) => set({ selectedZoneIds: ids, selectedZoneId: ids[ids.length - 1] ?? null }),
-      clearSelection: () => set({ selectedZoneId: null, selectedZoneIds: [], selectedSeatId: null }),
-      selectSeat: (id) => set({ selectedSeatId: id }),
+      clearSelection: () =>
+        set({ selectedZoneId: null, selectedZoneIds: [], selectedSeatId: null, selectedSeatIds: [] }),
+
+      selectSeat: (id, opts) =>
+        set((s) => {
+          if (id === null) return { selectedSeatId: null, selectedSeatIds: [] };
+          // Range select (Shift): pick all seats between last selected and current within the same zone
+          if (opts?.range && s.selectedSeatId) {
+            const af = activeFloor(s);
+            if (af) {
+              const zone = af.zones.find(
+                (z) => z.seats.some((x) => x.id === id) && z.seats.some((x) => x.id === s.selectedSeatId)
+              );
+              if (zone) {
+                const ai = zone.seats.findIndex((x) => x.id === s.selectedSeatId);
+                const bi = zone.seats.findIndex((x) => x.id === id);
+                const [lo, hi] = ai < bi ? [ai, bi] : [bi, ai];
+                const ids = zone.seats.slice(lo, hi + 1).map((x) => x.id);
+                return { selectedSeatId: id, selectedSeatIds: ids };
+              }
+            }
+          }
+          if (opts?.additive) {
+            const set2 = new Set(s.selectedSeatIds.length ? s.selectedSeatIds : s.selectedSeatId ? [s.selectedSeatId] : []);
+            if (set2.has(id)) set2.delete(id); else set2.add(id);
+            const arr = Array.from(set2);
+            return { selectedSeatId: id, selectedSeatIds: arr };
+          }
+          return { selectedSeatId: id, selectedSeatIds: [id] };
+        }),
+      selectSeats: (ids) => set({ selectedSeatIds: ids, selectedSeatId: ids[ids.length - 1] ?? null }),
+      clearSeatSelection: () => set({ selectedSeatId: null, selectedSeatIds: [] }),
+
+      bulkUpdateSelectedSeats: (patch) =>
+        set((s) => {
+          const ids = new Set(s.selectedSeatIds.length ? s.selectedSeatIds : s.selectedSeatId ? [s.selectedSeatId] : []);
+          if (!ids.size) return {};
+          let count = 0;
+          return withHistory(s, {
+            floors: s.floors.map((f) => ({
+              ...f,
+              zones: f.zones.map((z) => ({
+                ...z,
+                seats: z.seats.map((seat) => {
+                  if (!ids.has(seat.id)) return seat;
+                  if (seat.locked && !("locked" in patch)) return seat;
+                  count++;
+                  return { ...seat, ...patch };
+                }),
+              })),
+            })),
+            changeLog: log(s, "Bulk-updated seats", `${count} seat(s)`),
+          });
+        }),
+
+      bulkSetSelectedSeatType: (type) =>
+        set((s) => {
+          const ids = new Set(s.selectedSeatIds.length ? s.selectedSeatIds : s.selectedSeatId ? [s.selectedSeatId] : []);
+          if (!ids.size) return {};
+          let count = 0;
+          return withHistory(s, {
+            floors: s.floors.map((f) => ({
+              ...f,
+              zones: f.zones.map((z) => ({
+                ...z,
+                seats: z.seats.map((seat) => {
+                  if (!ids.has(seat.id) || seat.locked) return seat;
+                  count++;
+                  return {
+                    ...seat,
+                    type,
+                    history: [
+                      { id: uid(), date: new Date().toISOString(), type: "change" as const, description: `Bulk → ${type}` },
+                      ...seat.history,
+                    ].slice(0, 50),
+                  };
+                }),
+              })),
+            })),
+            changeLog: log(s, "Bulk-set seat type", `${count} → ${type}`),
+          });
+        }),
+
+      selectAllZonesOnActiveFloor: () =>
+        set((s) => {
+          const f = activeFloor(s);
+          if (!f) return {};
+          const ids = f.zones.map((z) => z.id);
+          return { selectedZoneIds: ids, selectedZoneId: ids[ids.length - 1] ?? null, selectedSeatId: null, selectedSeatIds: [] };
+        }),
       setZoom: (z) => set({ zoom: Math.min(2, Math.max(0.4, z)) }),
       toggleDark: () =>
         set((s) => {
