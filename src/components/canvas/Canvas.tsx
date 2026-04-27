@@ -4,6 +4,7 @@ import { Zone } from "./Zone";
 import { Button } from "@/components/ui/button";
 import { ZoomIn, ZoomOut, Maximize, Ruler, Lock } from "lucide-react";
 import { AlignmentToolbar } from "@/components/AlignmentToolbar";
+import { BulkSeatActions } from "@/components/BulkSeatActions";
 
 interface Props { searchQuery: string }
 
