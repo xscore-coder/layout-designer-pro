@@ -86,7 +86,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [undo, redo, selectedZoneId, selectedZoneIds, removeZone, moveSelectedBy, clearSelection, duplicateZone, groupSelected]);
+  }, [undo, redo, selectedZoneId, selectedZoneIds, removeZone, moveSelectedBy, clearSelection, duplicateZone, groupSelected, selectAll]);
 
   useEffect(() => {
     if (!pan) return;
