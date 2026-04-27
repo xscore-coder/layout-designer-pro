@@ -184,8 +184,14 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
         ref={stageRef}
         data-canvas-stage
         onMouseDown={(e) => {
+          // Only initiate lasso when clicking the stage background (not a zone/seat)
           if (e.target === e.currentTarget && e.button === 0 && !e.altKey) {
-            clearSelection();
+            const rect = stageRef.current!.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / zoom;
+            const y = (e.clientY - rect.top) / zoom;
+            const additive = e.shiftKey || e.metaKey || e.ctrlKey;
+            setLasso({ x0: x, y0: y, x1: x, y1: y, additive });
+            if (!additive) clearSelection();
           }
         }}
         className="absolute origin-top-left"
@@ -205,7 +211,23 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
             otherZones={otherZones}
           />
         ))}
+
+        {/* Lasso (marquee) rectangle — drawn in stage (canvas) coordinates */}
+        {lasso && (
+          <div
+            className="absolute pointer-events-none border-2 border-primary bg-primary/10 rounded-sm z-50"
+            style={{
+              left: Math.min(lasso.x0, lasso.x1),
+              top: Math.min(lasso.y0, lasso.y1),
+              width: Math.abs(lasso.x1 - lasso.x0),
+              height: Math.abs(lasso.y1 - lasso.y0),
+            }}
+          />
+        )}
       </div>
+
+      {/* Bulk seat actions bar (shown when 2+ seats selected) */}
+      <BulkSeatActions />
 
       {/* Multi-select Alignment toolbar */}
       <AlignmentToolbar />
