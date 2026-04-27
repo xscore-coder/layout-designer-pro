@@ -16,7 +16,6 @@ import {
   DoorOpen,
   Coffee,
   Bath,
-  Stairs,
   ArrowUpDown,
   Trees,
 } from "lucide-react";
