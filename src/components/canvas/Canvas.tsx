@@ -169,9 +169,12 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
         if (e.button === 1 || (e.button === 0 && e.altKey)) {
           e.preventDefault();
           setPan({ ox: e.clientX, oy: e.clientY, sx: panOffset.x, sy: panOffset.y });
-        } else if (e.target === e.currentTarget || (e.target as HTMLElement).closest("[data-canvas-stage]") === stageRef.current && e.target === stageRef.current) {
+        } else if (e.target === e.currentTarget) {
+          // Click outside the stage entirely
           clearSelection();
         }
+        // NOTE: clicking on empty stage area is now handled by the inner
+        // stage onMouseDown which starts a lasso (marquee) selection.
       }}
       onWheel={(e) => {
         if (e.ctrlKey || e.metaKey) {
