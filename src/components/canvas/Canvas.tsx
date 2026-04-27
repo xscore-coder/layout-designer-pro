@@ -65,6 +65,9 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
           e.preventDefault();
           groupSelected();
         }
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "a") {
+        e.preventDefault();
+        selectAll();
       } else if (e.key === "Escape") {
         clearSelection();
       } else if (e.key === "Delete" || e.key === "Backspace") {
