@@ -102,6 +102,48 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
     };
   }, [pan]);
 
+  // ===== Lasso (marquee) selection =====
+  useEffect(() => {
+    if (!lasso) return;
+    const stage = stageRef.current;
+    if (!stage) return;
+    const rect = stage.getBoundingClientRect();
+    const onMove = (e: MouseEvent) => {
+      // convert client coords to stage (canvas) coords
+      const x = (e.clientX - rect.left) / zoom;
+      const y = (e.clientY - rect.top) / zoom;
+      setLasso((l) => (l ? { ...l, x1: x, y1: y } : l));
+    };
+    const onUp = () => {
+      setLasso((l) => {
+        if (!l) return null;
+        const x = Math.min(l.x0, l.x1);
+        const y = Math.min(l.y0, l.y1);
+        const w = Math.abs(l.x1 - l.x0);
+        const h = Math.abs(l.y1 - l.y0);
+        // Tiny drag = treat as click → keep selection cleared
+        if (w < 4 && h < 4) {
+          if (!l.additive) clearSelection();
+          return null;
+        }
+        const hits = floor.zones
+          .filter((z) => !z.hidden && z.x < x + w && z.x + z.width > x && z.y < y + h && z.y + z.height > y)
+          .map((z) => z.id);
+        const finalIds = l.additive
+          ? Array.from(new Set([...selectedZoneIds, ...hits]))
+          : hits;
+        selectMany(finalIds);
+        return null;
+      });
+    };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+  }, [lasso, zoom, floor.zones, selectedZoneIds, selectMany, clearSelection]);
+
   const heatmapMax = Math.max(
     1,
     ...floor.zones.flatMap((z) => z.seats.map((s) => s.problemCount))
