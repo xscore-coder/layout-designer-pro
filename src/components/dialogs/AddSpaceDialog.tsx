@@ -91,7 +91,7 @@ export function AddSpaceDialog({ open, onOpenChange }: Props) {
             <Label className="text-xs uppercase tracking-wide text-muted-foreground mb-2 block">
               Space Type
             </Label>
-            <ScrollArea className="max-h-[280px] pr-2">
+            <div className="h-[260px] overflow-y-auto pr-2 rounded-md border border-border/40 bg-muted/10 p-2 [scrollbar-width:thin] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border hover:[&::-webkit-scrollbar-thumb]:bg-muted-foreground/40 [&::-webkit-scrollbar-track]:bg-transparent">
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {PRESETS.map((p, i) => {
                   const Icon = p.icon;
