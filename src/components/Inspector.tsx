@@ -16,20 +16,23 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-/** Shared quick-pick note templates (Arabic + English mix). */
+/** Shared quick-pick note templates (English). */
 const NOTE_TEMPLATES = [
-  "شاشة لا تعمل",
-  "كيبورد بايظ",
-  "ماوس مش شغالة",
-  "السماعة بايظة",
-  "محتاج فورمات",
-  "النت مفصول",
-  "الجهاز بطيء جداً",
-  "محتاج RAM",
-  "هارد بايظ",
-  "تم الإصلاح ✓",
+  "Monitor not working",
+  "Keyboard broken",
+  "Mouse not working",
+  "Speaker broken",
+  "Needs format",
+  "No internet connection",
+  "PC running very slow",
+  "Needs RAM upgrade",
+  "Hard drive failure",
+  "Fixed ✓",
   "Needs replacement",
   "Under maintenance",
+  "Power supply issue",
+  "Overheating",
+  "Missing peripherals",
 ];
 
 export function Inspector() {
