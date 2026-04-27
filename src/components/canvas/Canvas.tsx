@@ -18,7 +18,9 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
   const zoom = useFloorPlan((s) => s.zoom);
   const setZoom = useFloorPlan((s) => s.setZoom);
   const selectZone = useFloorPlan((s) => s.selectZone);
+  const selectMany = useFloorPlan((s) => s.selectMany);
   const clearSelection = useFloorPlan((s) => s.clearSelection);
+  const selectAll = useFloorPlan((s) => s.selectAllZonesOnActiveFloor);
   const removeZone = useFloorPlan((s) => s.removeZone);
   const selectedZoneId = useFloorPlan((s) => s.selectedZoneId);
   const selectedZoneIds = useFloorPlan((s) => s.selectedZoneIds);
@@ -35,6 +37,8 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
   const stageRef = useRef<HTMLDivElement>(null);
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
   const [pan, setPan] = useState<{ ox: number; oy: number; sx: number; sy: number } | null>(null);
+  // Lasso (marquee) selection — coordinates are in canvas (stage) space
+  const [lasso, setLasso] = useState<{ x0: number; y0: number; x1: number; y1: number; additive: boolean } | null>(null);
 
   useImperativeHandle(ref, () => ({
     getStageEl: () => stageRef.current,
