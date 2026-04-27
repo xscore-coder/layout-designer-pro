@@ -35,8 +35,10 @@ const Index = () => {
 
         <Canvas ref={canvasRef} searchQuery={search} />
 
-        <aside className="w-80 border-l border-border bg-card flex flex-col shrink-0 print:hidden">
-          <Inspector />
+        <aside className="w-80 border-l border-border bg-card flex flex-col shrink-0 print:hidden overflow-hidden">
+          <div className="flex-1 overflow-y-auto">
+            <Inspector />
+          </div>
         </aside>
       </div>
     </div>
