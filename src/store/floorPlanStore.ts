@@ -1034,7 +1034,14 @@ export const useFloorPlan = create<Store>()(
         versions: s.versions,
       }),
       onRehydrateStorage: () => (state) => {
-        if (state?.darkMode) document.documentElement.classList.add("dark");
+        // Apply persisted dark choice; fall back to system preference on first run.
+        const sysDark = typeof window !== "undefined"
+          && window.matchMedia?.("(prefers-color-scheme: dark)").matches;
+        const shouldDark = state ? !!state.darkMode : !!sysDark;
+        if (shouldDark) document.documentElement.classList.add("dark");
+        if (state && !state.darkMode && sysDark) {
+          state.darkMode = true;
+        }
       },
     }
   )
