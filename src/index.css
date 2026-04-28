@@ -169,6 +169,15 @@
   }
 }
 
+@layer base {
+  /* Smooth color transitions when toggling dark mode (but skip on canvas/transforms for perf) */
+  html.theme-transition,
+  html.theme-transition body,
+  html.theme-transition *:not(.no-theme-transition):not([data-canvas-stage] *) {
+    transition: background-color 220ms ease, color 220ms ease, border-color 220ms ease, fill 220ms ease, stroke 220ms ease !important;
+  }
+}
+
 @layer components {
   .canvas-grid-bg {
     background-color: hsl(var(--canvas-bg));
@@ -217,6 +226,25 @@
   }
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
     background: hsl(var(--muted-foreground) / 0.4);
+  }
+
+  /* Mobile/touch tweaks */
+  @media (max-width: 767px) {
+    /* Larger tap targets for seats on touch devices */
+    .canvas-grid-bg button {
+      min-height: 36px;
+      min-width: 36px;
+    }
+  }
+
+  /* Reminder bell pulse animation */
+  @keyframes bell-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+  }
+  .bell-pulse {
+    animation: bell-pulse 1.6s ease-in-out infinite;
+    transform-origin: center;
   }
 }
 
