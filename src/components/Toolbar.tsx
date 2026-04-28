@@ -149,8 +149,8 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
 
   return (
     <>
-      <div className="h-14 border-b border-border bg-card/80 backdrop-blur flex items-center gap-1 px-3 shrink-0 z-10">
-        <div className="flex items-center gap-2 mr-3">
+      <div className="h-14 border-b border-border bg-card/80 backdrop-blur flex items-center gap-1 px-2 sm:px-3 shrink-0 z-10 overflow-x-auto scrollbar-thin">
+        <div className="flex items-center gap-2 mr-2 sm:mr-3 shrink-0">
           <img src={vodafoneLogo} alt="Vodafone" className="h-8 w-8 object-contain" />
           <h1 className="font-bold text-sm hidden md:block">Vodafone Floor</h1>
         </div>
