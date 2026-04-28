@@ -355,32 +355,62 @@ export function Zone({ zone, searchQuery, zoom, heatmapMax, otherZones = [] }: P
                     : undefined,
               }}
             >
-              {/* HEADER = drag handle */}
+              {/* HEADER = drag handle (double-click to rename) */}
               <div
-                onMouseDown={onHeaderMouseDown}
+                onMouseDown={(e) => { if (editingName) return; onHeaderMouseDown(e); }}
+                onDoubleClick={(e) => {
+                  if (isLocked || isSpace) return;
+                  e.stopPropagation();
+                  setDraftName(zone.name);
+                  setEditingName(true);
+                }}
                 onMouseEnter={() => setHoverHandle(true)}
                 onMouseLeave={() => setHoverHandle(false)}
                 className={cn(
                   "px-3 py-1.5 flex items-center justify-between text-xs font-semibold select-none transition-colors",
-                  isLocked ? "cursor-not-allowed" : "cursor-grab active:cursor-grabbing",
-                  hoverHandle && !isLocked && "brightness-110"
+                  isLocked ? "cursor-not-allowed" : editingName ? "cursor-text" : "cursor-grab active:cursor-grabbing",
+                  hoverHandle && !isLocked && !editingName && "brightness-110"
                 )}
                 style={{
                   backgroundColor: !isSpace ? `hsl(${zone.color} / 0.15)` : undefined,
                   color: !isSpace ? `hsl(${zone.color})` : undefined,
                 }}
+                title={!isSpace && !isLocked ? "Double-click to rename" : undefined}
               >
-                <span className="flex items-center gap-1.5 truncate">
+                <span className="flex items-center gap-1.5 truncate flex-1 min-w-0">
                   <GripHorizontal className="h-3 w-3 opacity-60 shrink-0" />
                   {isLocked && <Lock className="h-3 w-3" />}
-                  {isSpace ? SPACE_LABELS[zone.spaceKind ?? "blank"] : zone.name}
+                  {isSpace ? (
+                    SPACE_LABELS[zone.spaceKind ?? "blank"]
+                  ) : editingName ? (
+                    <input
+                      autoFocus
+                      value={draftName}
+                      onChange={(e) => setDraftName(e.target.value)}
+                      onMouseDown={(e) => e.stopPropagation()}
+                      onClick={(e) => e.stopPropagation()}
+                      onBlur={() => {
+                        const n = draftName.trim();
+                        if (n && n !== zone.name) updateZone(zone.id, { name: n });
+                        setEditingName(false);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") (e.currentTarget as HTMLInputElement).blur();
+                        if (e.key === "Escape") { setDraftName(zone.name); setEditingName(false); }
+                      }}
+                      className="bg-card/95 text-foreground px-1.5 py-0.5 rounded text-xs font-semibold outline-none ring-2 ring-ring w-full min-w-0"
+                    />
+                  ) : (
+                    <span className="truncate">{zone.name}</span>
+                  )}
                 </span>
-                {!isSpace && (
-                  <span className="text-[10px] font-mono opacity-70">
+                {!isSpace && !editingName && (
+                  <span className="text-[10px] font-mono opacity-70 shrink-0 ml-2">
                     {zone.seats.length} PCs
                   </span>
                 )}
               </div>
+
 
               {isSpace ? (
                 <div className="flex-1 h-full flex items-center justify-center text-muted-foreground/60 text-xs uppercase tracking-widest">
