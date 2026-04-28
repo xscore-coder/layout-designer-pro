@@ -37,6 +37,8 @@ export function Seat({ seat, zone, highlighted, heatmapMax }: Props) {
   // Inline note popover
   const [noteOpen, setNoteOpen] = useState(false);
   const [draftNote, setDraftNote] = useState(seat.note ?? "");
+  // Defer single-click cycling so a quick second click (double-click) can cancel it
+  const clickTimerRef = useRef<number | null>(null);
 
   const Icon = ICONS[seat.type] ?? MinusCircle;
 
