@@ -67,16 +67,26 @@ export function Seat({ seat, zone, highlighted, heatmapMax }: Props) {
             if (additive || range) {
               // Multi-select mode — DON'T cycle, just toggle/extend selection
               select(seat.id, { additive, range });
-            } else {
-              if (!seat.locked) cycle(zone.id, seat.id);
-              select(seat.id);
+              return;
             }
+            // Always select right away (instant feedback)
+            select(seat.id);
+            // Defer the type cycle so a quick double-click can cancel it
+            if (clickTimerRef.current) window.clearTimeout(clickTimerRef.current);
+            clickTimerRef.current = window.setTimeout(() => {
+              if (!seat.locked) cycle(zone.id, seat.id);
+              clickTimerRef.current = null;
+            }, 220);
           }}
           onDoubleClick={(e) => {
             e.stopPropagation();
             e.preventDefault();
+            // Cancel the pending single-click cycle
+            if (clickTimerRef.current) {
+              window.clearTimeout(clickTimerRef.current);
+              clickTimerRef.current = null;
+            }
             if (seat.locked) return;
-            // open inline note editor (revert the cycle that single-click did)
             setDraftNote(seat.note ?? "");
             setNoteOpen(true);
           }}
