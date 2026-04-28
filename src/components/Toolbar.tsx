@@ -18,6 +18,7 @@ import { VersionsDialog } from "./dialogs/VersionsDialog";
 import { TemplatesDialog } from "./dialogs/TemplatesDialog";
 import { DashboardDialog } from "./dialogs/DashboardDialog";
 import { ImportMergeDialog, type IncomingRow } from "./dialogs/ImportMergeDialog";
+import { NotificationsBell } from "./NotificationsBell";
 import { ThemePicker } from "./ThemePicker";
 import { toast } from "sonner";
 import Papa from "papaparse";
@@ -148,8 +149,8 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
 
   return (
     <>
-      <div className="h-14 border-b border-border bg-card/80 backdrop-blur flex items-center gap-1 px-3 shrink-0 z-10">
-        <div className="flex items-center gap-2 mr-3">
+      <div className="h-14 border-b border-border bg-card/80 backdrop-blur flex items-center gap-1 px-2 sm:px-3 shrink-0 z-10 overflow-x-auto scrollbar-thin">
+        <div className="flex items-center gap-2 mr-2 sm:mr-3 shrink-0">
           <img src={vodafoneLogo} alt="Vodafone" className="h-8 w-8 object-contain" />
           <h1 className="font-bold text-sm hidden md:block">Vodafone Floor</h1>
         </div>
@@ -224,6 +225,8 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
               <History className="h-4 w-4" />
             </Button>
           </TooltipTrigger><TooltipContent>Versions</TooltipContent></Tooltip>
+
+          <NotificationsBell />
 
           <Button size="sm" variant="ghost" onClick={() => setDashboardOpen(true)}>
             <LayoutDashboard className="h-4 w-4 mr-1" /> Dashboard

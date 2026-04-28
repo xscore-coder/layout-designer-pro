@@ -614,7 +614,11 @@ export const useFloorPlan = create<Store>()(
       toggleDark: () =>
         set((s) => {
           const dark = !s.darkMode;
-          document.documentElement.classList.toggle("dark", dark);
+          // smooth color transition for ~250ms
+          const root = document.documentElement;
+          root.classList.add("theme-transition");
+          root.classList.toggle("dark", dark);
+          window.setTimeout(() => root.classList.remove("theme-transition"), 260);
           return { darkMode: dark };
         }),
       toggleHeatmap: () => set((s) => ({ heatmap: !s.heatmap })),
@@ -1030,7 +1034,14 @@ export const useFloorPlan = create<Store>()(
         versions: s.versions,
       }),
       onRehydrateStorage: () => (state) => {
-        if (state?.darkMode) document.documentElement.classList.add("dark");
+        // Apply persisted dark choice; fall back to system preference on first run.
+        const sysDark = typeof window !== "undefined"
+          && window.matchMedia?.("(prefers-color-scheme: dark)").matches;
+        const shouldDark = state ? !!state.darkMode : !!sysDark;
+        if (shouldDark) document.documentElement.classList.add("dark");
+        if (state && !state.darkMode && sysDark) {
+          state.darkMode = true;
+        }
       },
     }
   )
