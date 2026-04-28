@@ -614,7 +614,11 @@ export const useFloorPlan = create<Store>()(
       toggleDark: () =>
         set((s) => {
           const dark = !s.darkMode;
-          document.documentElement.classList.toggle("dark", dark);
+          // smooth color transition for ~250ms
+          const root = document.documentElement;
+          root.classList.add("theme-transition");
+          root.classList.toggle("dark", dark);
+          window.setTimeout(() => root.classList.remove("theme-transition"), 260);
           return { darkMode: dark };
         }),
       toggleHeatmap: () => set((s) => ({ heatmap: !s.heatmap })),
