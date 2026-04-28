@@ -18,6 +18,7 @@ import { VersionsDialog } from "./dialogs/VersionsDialog";
 import { TemplatesDialog } from "./dialogs/TemplatesDialog";
 import { DashboardDialog } from "./dialogs/DashboardDialog";
 import { ImportMergeDialog, type IncomingRow } from "./dialogs/ImportMergeDialog";
+import { NotificationsBell } from "./NotificationsBell";
 import { ThemePicker } from "./ThemePicker";
 import { toast } from "sonner";
 import Papa from "papaparse";
