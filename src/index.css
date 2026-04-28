@@ -80,63 +80,77 @@
   }
 
   .dark {
-    --background: 222 47% 7%;
+    /* Deep, rich background — true OLED-friendly with subtle blue tint */
+    --background: 222 47% 5%;
     --foreground: 210 40% 98%;
 
-    --card: 222 47% 10%;
+    --card: 222 38% 11%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222 47% 10%;
+    --popover: 222 40% 9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 217 91% 65%;
+    /* Brighter, more saturated primary for better contrast on dark */
+    --primary: 217 95% 68%;
     --primary-foreground: 222 47% 7%;
-    --primary-glow: 221 83% 70%;
+    --primary-glow: 221 91% 75%;
 
     --secondary: 217 33% 17%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 217 33% 14%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 217 33% 13%;
+    --muted-foreground: 215 25% 72%;
 
-    --accent: 199 89% 55%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 199 95% 60%;
+    --accent-foreground: 222 47% 7%;
 
-    --destructive: 0 75% 55%;
+    --destructive: 0 80% 62%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 142 71% 45%;
+    --success: 142 76% 52%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 100%;
+    --warning: 38 96% 58%;
+    --warning-foreground: 222 47% 7%;
 
-    --border: 217 33% 18%;
+    --border: 217 33% 20%;
     --input: 217 33% 18%;
-    --ring: 217 91% 65%;
+    --ring: 217 95% 68%;
 
-    --canvas-bg: 222 47% 9%;
-    --canvas-grid: 217 33% 16%;
-    --canvas-grid-strong: 217 33% 22%;
+    /* Canvas: slightly elevated, more visible grid */
+    --canvas-bg: 222 45% 7%;
+    --canvas-grid: 217 33% 18%;
+    --canvas-grid-strong: 217 33% 28%;
 
-    --seat-empty: 217 33% 22%;
-    --seat-agent: 217 91% 60%;
-    --seat-leader: 271 76% 60%;
-    --seat-super: 38 92% 55%;
-    --seat-problem: 0 75% 55%;
+    /* Seats: brighter & more vibrant, easier to read on dark */
+    --seat-empty: 217 33% 25%;
+    --seat-agent: 217 95% 65%;
+    --seat-leader: 271 82% 68%;
+    --seat-super: 38 96% 60%;
+    --seat-problem: 0 82% 62%;
 
-    --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.3);
-    --shadow-md: 0 4px 6px -1px hsl(0 0% 0% / 0.4);
-    --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.5);
+    /* Heatmap pops more in dark */
+    --heat-low: 142 76% 52%;
+    --heat-mid: 38 96% 58%;
+    --heat-high: 0 82% 62%;
 
-    --sidebar-background: 222 47% 10%;
+    /* Stronger shadows + colored glow */
+    --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.5);
+    --shadow-md: 0 4px 12px -1px hsl(0 0% 0% / 0.6), 0 2px 4px -2px hsl(0 0% 0% / 0.4);
+    --shadow-lg: 0 12px 32px -3px hsl(0 0% 0% / 0.7), 0 4px 8px -4px hsl(0 0% 0% / 0.5);
+    --shadow-glow: 0 0 0 4px hsl(var(--primary) / 0.18), 0 0 24px hsl(var(--primary) / 0.25);
+
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+    --gradient-accent: linear-gradient(135deg, hsl(var(--accent)), hsl(199 95% 70%));
+
+    --sidebar-background: 222 42% 8%;
     --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 217 91% 65%;
+    --sidebar-primary: 217 95% 68%;
     --sidebar-primary-foreground: 222 47% 7%;
-    --sidebar-accent: 217 33% 17%;
+    --sidebar-accent: 217 33% 16%;
     --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 217 33% 18%;
-    --sidebar-ring: 217 91% 65%;
+    --sidebar-border: 217 33% 20%;
+    --sidebar-ring: 217 95% 68%;
   }
 }
 
