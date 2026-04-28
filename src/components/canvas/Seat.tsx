@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useFloorPlan } from "@/store/floorPlanStore";
 import type { Seat as SeatT, Zone } from "@/types/floorplan";
 import { cn } from "@/lib/utils";
