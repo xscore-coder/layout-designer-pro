@@ -226,6 +226,8 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
             </Button>
           </TooltipTrigger><TooltipContent>Versions</TooltipContent></Tooltip>
 
+          <NotificationsBell />
+
           <Button size="sm" variant="ghost" onClick={() => setDashboardOpen(true)}>
             <LayoutDashboard className="h-4 w-4 mr-1" /> Dashboard
           </Button>
