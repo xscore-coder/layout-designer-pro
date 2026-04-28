@@ -86,6 +86,10 @@ export function Zone({ zone, searchQuery, zoom, heatmapMax, otherZones = [] }: P
   const [rotateS, setRotateS] = useState<RotateState | null>(null);
   const [guides, setGuides] = useState<{ v?: number; h?: number }>({});
   const [hoverHandle, setHoverHandle] = useState(false);
+  // Inline editing of zone name (double-click on header)
+  const [editingName, setEditingName] = useState(false);
+  const [draftName, setDraftName] = useState(zone.name);
+  useEffect(() => { if (!editingName) setDraftName(zone.name); }, [zone.name, editingName]);
 
   // ===== DRAG (header handle only) =====
   useEffect(() => {
