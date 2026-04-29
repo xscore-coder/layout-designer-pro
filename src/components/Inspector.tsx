@@ -13,7 +13,9 @@ import { Slider } from "@/components/ui/slider";
 import { ColorPicker } from "./ColorPicker";
 import {
   Lock, Unlock, Copy, Trash2, Plus, AlertTriangle, Info, Ungroup, X, ShieldCheck, Sparkles,
+  Monitor, MinusCircle,
 } from "lucide-react";
+import type { SeatType } from "@/types/floorplan";
 import { toast } from "sonner";
 
 /** Shared quick-pick note templates (English). */
