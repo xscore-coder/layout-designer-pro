@@ -86,24 +86,13 @@ const Index = () => {
                 </div>
               </SheetContent>
             </Sheet>
-              <SheetContent side="left" className="w-[85vw] max-w-[320px] p-0 flex flex-col">
-                <SheetHeader className="px-4 py-3 border-b border-border">
-                  <SheetTitle>Floors & Zones</SheetTitle>
-                </SheetHeader>
-                <div className="flex-1 overflow-y-auto flex flex-col">
-                  <FloorList />
-                  <ZoneList />
-                  <LayersPanel />
-                </div>
-              </SheetContent>
-            </Sheet>
 
             <Sheet open={rightOpen} onOpenChange={setRightOpen}>
               <SheetTrigger asChild>
                 <Button
                   size="icon"
                   variant="default"
-                  className="fixed bottom-20 right-3 z-30 rounded-full shadow-lg h-12 w-12 print:hidden"
+                  className="fixed bottom-4 right-3 z-30 rounded-full shadow-lg h-12 w-12 print:hidden"
                   aria-label="Open inspector"
                 >
                   <PanelRight className="h-5 w-5" />
