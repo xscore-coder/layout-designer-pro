@@ -74,10 +74,7 @@ function RenameDialog({
             onChange={(e) => setValue(e.target.value)}
             autoFocus
             onKeyDown={(e) => {
-              if (e.key === "Enter" && value.trim()) {
-                onSubmit(value.trim());
-                setValue("");
-              }
+              if (e.key === "Enter") submit();
             }}
           />
         </div>
@@ -85,14 +82,7 @@ function RenameDialog({
           <Button variant="outline" onClick={() => { setValue(""); onClose(); }}>
             Cancel
           </Button>
-          <Button
-            onClick={() => {
-              if (value.trim()) {
-                onSubmit(value.trim());
-                setValue("");
-              }
-            }}
-          >
+          <Button onClick={submit} disabled={!value.trim()}>
             Save
           </Button>
         </DialogFooter>
