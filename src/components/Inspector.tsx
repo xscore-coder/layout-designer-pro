@@ -55,9 +55,31 @@ export function Inspector() {
 
   if (!zone) {
     return (
-      <div className="p-6 text-center text-muted-foreground text-sm">
-        <Info className="h-8 w-8 mx-auto mb-2 opacity-40" />
-        Select a zone or seat to inspect & edit its properties.
+      <div className="p-8 flex flex-col items-center justify-center text-center min-h-[60vh] animate-fade-in">
+        <div className="relative mb-5">
+          <div className="absolute inset-0 bg-gradient-primary opacity-20 blur-2xl rounded-full" />
+          <div className="relative h-16 w-16 rounded-2xl bg-gradient-primary flex items-center justify-center shadow-glow">
+            <Info className="h-7 w-7 text-primary-foreground" />
+          </div>
+        </div>
+        <h3 className="text-sm font-semibold mb-1.5">Nothing selected</h3>
+        <p className="text-xs text-muted-foreground max-w-[220px] leading-relaxed mb-4">
+          اختار <span className="text-foreground font-medium">Zone</span> أو <span className="text-foreground font-medium">Cell</span> من الكانفس أو من القائمة الجانبية عشان تعرض و تعدّل الخصائص.
+        </p>
+        <div className="grid grid-cols-1 gap-1.5 text-[11px] text-muted-foreground w-full max-w-[240px]">
+          <div className="flex items-center gap-2 rounded-md border border-border bg-muted/30 px-2.5 py-1.5">
+            <kbd className="font-mono text-[10px] bg-card border border-border rounded px-1.5 py-0.5">Click</kbd>
+            <span>Select</span>
+          </div>
+          <div className="flex items-center gap-2 rounded-md border border-border bg-muted/30 px-2.5 py-1.5">
+            <kbd className="font-mono text-[10px] bg-card border border-border rounded px-1.5 py-0.5">Dbl-Click</kbd>
+            <span>Quick note</span>
+          </div>
+          <div className="flex items-center gap-2 rounded-md border border-border bg-muted/30 px-2.5 py-1.5">
+            <kbd className="font-mono text-[10px] bg-card border border-border rounded px-1.5 py-0.5">Right-Click</kbd>
+            <span>Change type</span>
+          </div>
+        </div>
       </div>
     );
   }
