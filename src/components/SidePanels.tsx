@@ -123,8 +123,10 @@ export function FloorList() {
                   onClick={() => setActive(f.id)}
                   onDoubleClick={() => setRenameTarget({ kind: "floor", id: f.id, name: f.name })}
                   className={cn(
-                    "group flex items-center gap-1.5 px-2 py-1.5 rounded-md cursor-pointer text-sm transition-colors min-w-0",
-                    activeId === f.id ? "bg-primary/10 text-primary" : "hover:bg-muted",
+                    "group flex items-center gap-1.5 px-2 py-1.5 rounded-md cursor-pointer text-sm transition-all duration-150 min-w-0 border border-transparent",
+                    activeId === f.id
+                      ? "bg-gradient-to-r from-primary/15 to-primary/5 text-primary border-primary/30 shadow-sm"
+                      : "hover:bg-muted hover:border-border",
                     f.locked && "opacity-90"
                   )}
                 >
