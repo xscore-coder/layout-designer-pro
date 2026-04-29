@@ -124,12 +124,13 @@ export function Seat({ seat, zone, highlighted, heatmapMax }: Props) {
               }}
               title={`PC ${seat.pcNumber}${seat.lockNumber ? ` • Lock ${seat.lockNumber}` : ""}${seat.locked ? " • 🔒 Locked" : ""}${seat.problemCount ? ` • ${seat.problemCount} issue(s)` : ""}${seat.note ? `\n📝 ${seat.note}` : ""}\n(Click=select • Double-click=note • Right-click=change type)`}
               className={cn(
-                "relative h-9 w-9 rounded-md flex items-center justify-center text-[10px] font-semibold transition-all",
-                "hover:scale-110 hover:z-10 hover:shadow-md",
+                "relative h-9 w-9 rounded-md flex items-center justify-center text-[10px] font-semibold transition-all duration-150",
+                "hover:scale-110 hover:z-10 hover:shadow-lg hover:brightness-110",
+                "active:scale-95",
                 TYPE_BG[seat.type] ?? TYPE_BG.empty,
-                selected && "ring-2 ring-ring ring-offset-1 ring-offset-card",
+                selected && "ring-2 ring-ring ring-offset-2 ring-offset-card scale-105 shadow-md z-10",
                 inMultiSelection && !selected && "ring-2 ring-accent ring-offset-1 ring-offset-card",
-                highlighted && "ring-2 ring-warning",
+                highlighted && "ring-2 ring-warning animate-pulse",
                 seat.locked && "outline outline-1 outline-amber-400/70"
               )}
               style={heatStyle}
