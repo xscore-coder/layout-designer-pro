@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFloorPlan } from "@/store/floorPlanStore";
 import type { Seat as SeatT, Zone } from "@/types/floorplan";
 import { cn } from "@/lib/utils";
@@ -42,6 +42,13 @@ export function Seat({ seat, zone, highlighted, heatmapMax }: Props) {
 
   const Icon = ICONS[seat.type] ?? MinusCircle;
 
+  // Cleanup timer on unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (clickTimerRef.current) window.clearTimeout(clickTimerRef.current);
+    };
+  }, []);
+
   let heatStyle: React.CSSProperties = {};
   if (heatmap && seat.problemCount > 0) {
     const ratio = Math.min(1, seat.problemCount / Math.max(1, heatmapMax));
@@ -76,7 +83,7 @@ export function Seat({ seat, zone, highlighted, heatmapMax }: Props) {
             clickTimerRef.current = window.setTimeout(() => {
               if (!seat.locked) cycle(zone.id, seat.id);
               clickTimerRef.current = null;
-            }, 220);
+            }, 180);
           }}
           onDoubleClick={(e) => {
             e.stopPropagation();
