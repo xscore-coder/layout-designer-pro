@@ -55,23 +55,50 @@ export function Inspector() {
 
   if (!zone) {
     return (
-      <div className="p-6 text-center text-muted-foreground text-sm">
-        <Info className="h-8 w-8 mx-auto mb-2 opacity-40" />
-        Select a zone or seat to inspect & edit its properties.
+      <div className="p-8 flex flex-col items-center justify-center text-center min-h-[60vh] animate-fade-in">
+        <div className="relative mb-5">
+          <div className="absolute inset-0 bg-gradient-primary opacity-20 blur-2xl rounded-full" />
+          <div className="relative h-16 w-16 rounded-2xl bg-gradient-primary flex items-center justify-center shadow-glow">
+            <Info className="h-7 w-7 text-primary-foreground" />
+          </div>
+        </div>
+        <h3 className="text-sm font-semibold mb-1.5">Nothing selected</h3>
+        <p className="text-xs text-muted-foreground max-w-[220px] leading-relaxed mb-4">
+          اختار <span className="text-foreground font-medium">Zone</span> أو <span className="text-foreground font-medium">Cell</span> من الكانفس أو من القائمة الجانبية عشان تعرض و تعدّل الخصائص.
+        </p>
+        <div className="grid grid-cols-1 gap-1.5 text-[11px] text-muted-foreground w-full max-w-[240px]">
+          <div className="flex items-center gap-2 rounded-md border border-border bg-muted/30 px-2.5 py-1.5">
+            <kbd className="font-mono text-[10px] bg-card border border-border rounded px-1.5 py-0.5">Click</kbd>
+            <span>Select</span>
+          </div>
+          <div className="flex items-center gap-2 rounded-md border border-border bg-muted/30 px-2.5 py-1.5">
+            <kbd className="font-mono text-[10px] bg-card border border-border rounded px-1.5 py-0.5">Dbl-Click</kbd>
+            <span>Quick note</span>
+          </div>
+          <div className="flex items-center gap-2 rounded-md border border-border bg-muted/30 px-2.5 py-1.5">
+            <kbd className="font-mono text-[10px] bg-card border border-border rounded px-1.5 py-0.5">Right-Click</kbd>
+            <span>Change type</span>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="p-4 border-b border-border flex items-center gap-2">
-        <div className="h-8 w-8 rounded-md shrink-0" style={{ backgroundColor: `hsl(${zone.color})` }} />
+    <div className="h-full flex flex-col animate-fade-in">
+      <div className="p-4 border-b border-border bg-gradient-to-br from-card to-muted/30 flex items-center gap-3">
+        <div
+          className="h-10 w-10 rounded-lg shrink-0 ring-2 ring-border shadow-sm"
+          style={{ backgroundColor: `hsl(${zone.color})` }}
+        />
         <div className="flex-1 min-w-0">
-          <p className="text-xs text-muted-foreground uppercase tracking-wide">Zone</p>
-          <p className="font-semibold truncate">{zone.name}</p>
+          <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">
+            {zone.kind === "space" ? "Space" : "Zone"}
+          </p>
+          <p className="font-semibold truncate text-sm">{zone.name}</p>
         </div>
-        <Button size="icon" variant="ghost" onClick={() => toggleLock(zone.id)} title={zone.locked ? "Unlock" : "Lock"}>
-          {zone.locked ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
+        <Button size="icon" variant="ghost" className="shrink-0" onClick={() => toggleLock(zone.id)} title={zone.locked ? "Unlock" : "Lock"}>
+          {zone.locked ? <Lock className="h-4 w-4 text-warning" /> : <Unlock className="h-4 w-4" />}
         </Button>
       </div>
 

@@ -150,51 +150,64 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
 
   return (
     <>
-      <div className="h-14 border-b border-border bg-card/80 backdrop-blur flex items-center gap-1 px-2 sm:px-3 shrink-0 z-10 overflow-x-auto scrollbar-thin">
-        <div className="flex items-center gap-2 mr-2 sm:mr-3 shrink-0">
-          <img src={vodafoneLogo} alt="Vodafone" className="h-8 w-8 object-contain" />
-          <h1 className="font-bold text-sm hidden md:block">Vodafone Floor</h1>
+      <div className="h-14 border-b border-border bg-card/70 backdrop-blur-xl flex items-center gap-1 px-2 sm:px-3 shrink-0 z-10 overflow-x-auto scrollbar-thin shadow-sm">
+        {/* Brand */}
+        <div className="flex items-center gap-2.5 mr-2 sm:mr-3 shrink-0">
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-primary opacity-30 blur-md rounded-full" />
+            <img src={vodafoneLogo} alt="Vodafone" className="relative h-9 w-9 object-contain" />
+          </div>
+          <div className="hidden md:flex flex-col leading-tight">
+            <h1 className="font-bold text-sm tracking-tight">Vodafone Floor</h1>
+            <span className="text-[10px] text-muted-foreground font-medium">Workspace Planner</span>
+          </div>
         </div>
 
-        <div className="h-6 w-px bg-border mx-1" />
+        <div className="h-7 w-px bg-border mx-1" />
 
-        <Button size="sm" onClick={() => setZoneOpen(true)} className="bg-gradient-primary text-primary-foreground hover:opacity-90">
-          <Plus className="h-4 w-4 mr-1" /> Zone
-        </Button>
-        <Button size="sm" variant="outline" onClick={() => setSpaceOpen(true)}>
-          <Square className="h-4 w-4 mr-1" /> Space
-        </Button>
-        <Button size="sm" variant="outline" onClick={() => setMergeOpen(true)}>
-          <Combine className="h-4 w-4 mr-1" /> Merge
-        </Button>
-        <Tooltip><TooltipTrigger asChild>
-          <Button size="sm" variant="outline" disabled={selectedZoneIds.length < 1}
-            onClick={() => { groupSelected(); toast.success("Grouped"); }}>
-            <Group className="h-4 w-4 mr-1" /> Group
+        {/* Create group */}
+        <div className="flex items-center gap-1 rounded-lg bg-muted/40 p-0.5 shrink-0">
+          <Button size="sm" onClick={() => setZoneOpen(true)} className="bg-gradient-primary text-primary-foreground hover:opacity-90 shadow-sm h-8">
+            <Plus className="h-4 w-4 mr-1" /> Zone
           </Button>
-        </TooltipTrigger><TooltipContent>Group selected into a Space</TooltipContent></Tooltip>
-        <Tooltip><TooltipTrigger asChild>
-          <Button size="sm" variant="outline" onClick={() => setTemplatesOpen(true)}>
-            <LayoutTemplate className="h-4 w-4 mr-1" /> Templates
+          <Button size="sm" variant="ghost" onClick={() => setSpaceOpen(true)} className="h-8">
+            <Square className="h-4 w-4 mr-1" /> Space
           </Button>
-        </TooltipTrigger><TooltipContent>Insert pre-built layout</TooltipContent></Tooltip>
+          <Button size="sm" variant="ghost" onClick={() => setMergeOpen(true)} className="h-8">
+            <Combine className="h-4 w-4 mr-1" /> Merge
+          </Button>
+          <Tooltip><TooltipTrigger asChild>
+            <Button size="sm" variant="ghost" disabled={selectedZoneIds.length < 1} className="h-8"
+              onClick={() => { groupSelected(); toast.success("Grouped"); }}>
+              <Group className="h-4 w-4 mr-1" /> Group
+            </Button>
+          </TooltipTrigger><TooltipContent>Group selected into a Space</TooltipContent></Tooltip>
+          <Tooltip><TooltipTrigger asChild>
+            <Button size="sm" variant="ghost" onClick={() => setTemplatesOpen(true)} className="h-8">
+              <LayoutTemplate className="h-4 w-4 mr-1" /> Templates
+            </Button>
+          </TooltipTrigger><TooltipContent>Insert pre-built layout</TooltipContent></Tooltip>
+        </div>
 
-        <div className="h-6 w-px bg-border mx-1" />
+        <div className="h-7 w-px bg-border mx-1" />
 
-        <Tooltip><TooltipTrigger asChild>
-          <Button size="icon" variant="ghost" onClick={undo}><Undo2 className="h-4 w-4" /></Button>
-        </TooltipTrigger><TooltipContent>Undo (Ctrl+Z)</TooltipContent></Tooltip>
-        <Tooltip><TooltipTrigger asChild>
-          <Button size="icon" variant="ghost" onClick={redo}><Redo2 className="h-4 w-4" /></Button>
-        </TooltipTrigger><TooltipContent>Redo (Ctrl+Y)</TooltipContent></Tooltip>
+        {/* History group */}
+        <div className="flex items-center gap-0.5 rounded-lg bg-muted/40 p-0.5 shrink-0">
+          <Tooltip><TooltipTrigger asChild>
+            <Button size="icon" variant="ghost" onClick={undo} className="h-8 w-8"><Undo2 className="h-4 w-4" /></Button>
+          </TooltipTrigger><TooltipContent>Undo (Ctrl+Z)</TooltipContent></Tooltip>
+          <Tooltip><TooltipTrigger asChild>
+            <Button size="icon" variant="ghost" onClick={redo} className="h-8 w-8"><Redo2 className="h-4 w-4" /></Button>
+          </TooltipTrigger><TooltipContent>Redo (Ctrl+Y)</TooltipContent></Tooltip>
+        </div>
 
-        <div className="h-6 w-px bg-border mx-1" />
+        <div className="h-7 w-px bg-border mx-1" />
 
         <Tooltip><TooltipTrigger asChild>
           <Button
             size="sm"
-            variant="outline"
-            className="text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/40"
+            variant="ghost"
+            className="text-destructive hover:text-destructive hover:bg-destructive/10 h-8"
             onClick={() => { setClearConfirmText(""); setClearOpen(true); }}
           >
             <Eraser className="h-4 w-4 mr-1" /> Clear Grid
@@ -203,84 +216,94 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
 
 
         <div className="ml-auto flex items-center gap-1">
-          <Tooltip><TooltipTrigger asChild>
-            <Button size="icon" variant={heatmap ? "default" : "ghost"} onClick={toggleHeatmap}>
-              <Flame className="h-4 w-4" />
-            </Button>
-          </TooltipTrigger><TooltipContent>Heatmap</TooltipContent></Tooltip>
+          {/* View toggles */}
+          <div className="flex items-center gap-0.5 rounded-lg bg-muted/40 p-0.5 shrink-0">
+            <Tooltip><TooltipTrigger asChild>
+              <Button size="icon" variant={heatmap ? "default" : "ghost"} onClick={toggleHeatmap} className="h-8 w-8">
+                <Flame className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger><TooltipContent>Heatmap</TooltipContent></Tooltip>
 
-          <Tooltip><TooltipTrigger asChild>
-            <Button size="icon" variant={collisionDetection ? "default" : "ghost"} onClick={toggleCollision}>
-              <ShieldAlert className="h-4 w-4" />
-            </Button>
-          </TooltipTrigger><TooltipContent>Collision detection</TooltipContent></Tooltip>
+            <Tooltip><TooltipTrigger asChild>
+              <Button size="icon" variant={collisionDetection ? "default" : "ghost"} onClick={toggleCollision} className="h-8 w-8">
+                <ShieldAlert className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger><TooltipContent>Collision detection</TooltipContent></Tooltip>
+          </div>
 
-          <Tooltip><TooltipTrigger asChild>
-            <Button size="icon" variant="ghost" onClick={() => { saveVersion(); toast.success("Snapshot saved"); }}>
-              <Save className="h-4 w-4" />
-            </Button>
-          </TooltipTrigger><TooltipContent>Save snapshot</TooltipContent></Tooltip>
+          {/* Save / Versions */}
+          <div className="flex items-center gap-0.5 rounded-lg bg-muted/40 p-0.5 shrink-0">
+            <Tooltip><TooltipTrigger asChild>
+              <Button size="icon" variant="ghost" onClick={() => { saveVersion(); toast.success("Snapshot saved"); }} className="h-8 w-8">
+                <Save className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger><TooltipContent>Save snapshot</TooltipContent></Tooltip>
 
-          <Tooltip><TooltipTrigger asChild>
-            <Button size="icon" variant="ghost" onClick={() => setVersionsOpen(true)}>
-              <History className="h-4 w-4" />
-            </Button>
-          </TooltipTrigger><TooltipContent>Versions</TooltipContent></Tooltip>
+            <Tooltip><TooltipTrigger asChild>
+              <Button size="icon" variant="ghost" onClick={() => setVersionsOpen(true)} className="h-8 w-8">
+                <History className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger><TooltipContent>Versions</TooltipContent></Tooltip>
 
-          <NotificationsBell />
+            <NotificationsBell />
+          </div>
 
-          <Button size="sm" variant="ghost" onClick={() => setDashboardOpen(true)}>
-            <LayoutDashboard className="h-4 w-4 mr-1" /> Dashboard
+          {/* Reports */}
+          <Button size="sm" variant="ghost" onClick={() => setDashboardOpen(true)} className="h-8">
+            <LayoutDashboard className="h-4 w-4 mr-1" /> <span className="hidden lg:inline">Dashboard</span>
           </Button>
 
-          <Button size="sm" variant="ghost" onClick={() => setReportOpen(true)}>
-            <FileBarChart className="h-4 w-4 mr-1" /> Report
+          <Button size="sm" variant="ghost" onClick={() => setReportOpen(true)} className="h-8">
+            <FileBarChart className="h-4 w-4 mr-1" /> <span className="hidden lg:inline">Report</span>
           </Button>
 
           <Tooltip><TooltipTrigger asChild>
-            <Button size="icon" variant="default" className="bg-gradient-primary text-primary-foreground" onClick={() => setPrintOpen(true)}>
+            <Button size="icon" variant="default" className="bg-gradient-primary text-primary-foreground shadow-sm hover:shadow-md transition-shadow h-8 w-8" onClick={() => setPrintOpen(true)}>
               <Printer className="h-4 w-4" />
             </Button>
           </TooltipTrigger><TooltipContent>Print / Export PDF</TooltipContent></Tooltip>
 
           <ThemePicker />
 
-          <Tooltip><TooltipTrigger asChild>
-            <Button size="icon" variant="ghost" onClick={() => fileRef.current?.click()}>
-              <Upload className="h-4 w-4" />
-            </Button>
-          </TooltipTrigger><TooltipContent>Import CSV (PC problems)</TooltipContent></Tooltip>
-          <input ref={fileRef} type="file" accept=".csv,.txt" hidden
-            onChange={(e) => e.target.files?.[0] && onImport(e.target.files[0])} />
+          {/* IO group */}
+          <div className="flex items-center gap-0.5 rounded-lg bg-muted/40 p-0.5 shrink-0">
+            <Tooltip><TooltipTrigger asChild>
+              <Button size="icon" variant="ghost" onClick={() => fileRef.current?.click()} className="h-8 w-8">
+                <Upload className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger><TooltipContent>Import CSV (PC problems)</TooltipContent></Tooltip>
+            <input ref={fileRef} type="file" accept=".csv,.txt" hidden
+              onChange={(e) => e.target.files?.[0] && onImport(e.target.files[0])} />
+
+            <Tooltip><TooltipTrigger asChild>
+              <Button size="icon" variant="ghost" onClick={exportJSON} className="h-8 w-8">
+                <Download className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger><TooltipContent>Export JSON</TooltipContent></Tooltip>
+
+            <Tooltip><TooltipTrigger asChild>
+              <Button size="icon" variant="ghost" onClick={exportExcel} className="h-8 w-8">
+                <FileSpreadsheet className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger><TooltipContent>Export CSV</TooltipContent></Tooltip>
+
+            <Tooltip><TooltipTrigger asChild>
+              <Button size="icon" variant="ghost" onClick={() => jsonRef.current?.click()} className="h-8 w-8">
+                <LayoutGrid className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger><TooltipContent>Load JSON</TooltipContent></Tooltip>
+            <input ref={jsonRef} type="file" accept=".json" hidden
+              onChange={(e) => e.target.files?.[0] && onLoadJSON(e.target.files[0])} />
+          </div>
 
           <Tooltip><TooltipTrigger asChild>
-            <Button size="icon" variant="ghost" onClick={exportJSON}>
-              <Download className="h-4 w-4" />
-            </Button>
-          </TooltipTrigger><TooltipContent>Export JSON</TooltipContent></Tooltip>
-
-          <Tooltip><TooltipTrigger asChild>
-            <Button size="icon" variant="ghost" onClick={exportExcel}>
-              <FileSpreadsheet className="h-4 w-4" />
-            </Button>
-          </TooltipTrigger><TooltipContent>Export CSV</TooltipContent></Tooltip>
-
-          <Tooltip><TooltipTrigger asChild>
-            <Button size="icon" variant="ghost" onClick={() => jsonRef.current?.click()}>
-              <LayoutGrid className="h-4 w-4" />
-            </Button>
-          </TooltipTrigger><TooltipContent>Load JSON</TooltipContent></Tooltip>
-          <input ref={jsonRef} type="file" accept=".json" hidden
-            onChange={(e) => e.target.files?.[0] && onLoadJSON(e.target.files[0])} />
-
-          <Tooltip><TooltipTrigger asChild>
-            <Button size="icon" variant="ghost" onClick={toggleDark}>
-              {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            <Button size="icon" variant="ghost" onClick={toggleDark} className="h-8 w-8">
+              {darkMode ? <Sun className="h-4 w-4 text-warning" /> : <Moon className="h-4 w-4" />}
             </Button>
           </TooltipTrigger><TooltipContent>Toggle dark mode</TooltipContent></Tooltip>
 
           <Tooltip><TooltipTrigger asChild>
-            <Button size="icon" variant="ghost" onClick={() => setResetOpen(true)}>
+            <Button size="icon" variant="ghost" onClick={() => setResetOpen(true)} className="h-8 w-8 hover:bg-destructive/10">
               <Trash2 className="h-4 w-4 text-destructive" />
             </Button>
           </TooltipTrigger><TooltipContent>Reset all (delete every floor)</TooltipContent></Tooltip>
