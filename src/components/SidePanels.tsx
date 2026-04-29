@@ -218,9 +218,11 @@ export function ZoneList() {
       <ScrollArea className="flex-1">
         <div className="px-2 pb-2 space-y-1">
           {floor.zones.length === 0 && (
-            <p className="text-xs text-muted-foreground text-center py-4 px-2">
-              No zones yet.
-            </p>
+            <div className="text-center py-6 px-2">
+              <Layers className="h-6 w-6 mx-auto opacity-30 mb-1.5" />
+              <p className="text-xs text-muted-foreground">No zones yet.</p>
+              <p className="text-[10px] text-muted-foreground/70 mt-0.5">Add one from the toolbar.</p>
+            </div>
           )}
           {floor.zones.map((z) => (
             <ContextMenu key={z.id}>
@@ -229,13 +231,16 @@ export function ZoneList() {
                   onClick={() => select(z.id)}
                   onDoubleClick={() => setRenameTarget({ kind: "zone", id: z.id, name: z.name })}
                   className={cn(
-                    "w-full text-left flex items-center gap-2 px-2 py-1.5 rounded-md text-sm transition-colors min-w-0",
-                    selectedId === z.id ? "bg-muted ring-1 ring-ring" : "hover:bg-muted/60"
+                    "w-full text-left flex items-center gap-2 px-2 py-1.5 rounded-md text-sm transition-all duration-150 min-w-0 border border-transparent",
+                    selectedId === z.id
+                      ? "bg-gradient-to-r from-primary/10 to-transparent ring-1 ring-primary/40 border-primary/20 shadow-sm"
+                      : "hover:bg-muted/60 hover:border-border"
                   )}
                 >
-                  <div className="h-3 w-3 rounded-sm shrink-0" style={{ backgroundColor: `hsl(${z.color})` }} />
+                  <div className="h-3.5 w-3.5 rounded-sm shrink-0 ring-1 ring-border/60" style={{ backgroundColor: `hsl(${z.color})` }} />
                   <span className="flex-1 truncate min-w-0">{z.name}</span>
-                  <span className="text-[10px] text-muted-foreground font-mono shrink-0">
+                  {z.locked && <Lock className="h-3 w-3 text-warning shrink-0" />}
+                  <span className="text-[10px] text-muted-foreground font-mono shrink-0 px-1.5 py-px rounded bg-muted/60">
                     {z.kind === "zone" ? z.seats.length : z.spaceKind}
                   </span>
                 </button>
