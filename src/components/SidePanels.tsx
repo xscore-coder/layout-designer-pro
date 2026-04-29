@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFloorPlan, useActiveFloor } from "@/store/floorPlanStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,10 +38,17 @@ function RenameDialog({
 }) {
   const [value, setValue] = useState("");
 
-  // Sync value when target changes
-  if (target && value === "" && target.name) {
-    // initialize on first render after open
-  }
+  // Properly sync value whenever the target changes (open/swap)
+  useEffect(() => {
+    if (target) setValue(target.name);
+  }, [target]);
+
+  const submit = () => {
+    const trimmed = value.trim();
+    if (!trimmed) return;
+    onSubmit(trimmed);
+    setValue("");
+  };
 
   return (
     <Dialog
@@ -53,13 +60,7 @@ function RenameDialog({
         }
       }}
     >
-      <DialogContent
-        className="sm:max-w-[400px]"
-        onOpenAutoFocus={(e) => {
-          // initialize the input value when opening
-          if (target) setValue(target.name);
-        }}
-      >
+      <DialogContent className="sm:max-w-[400px]">
         <DialogHeader>
           <DialogTitle>
             Rename {target?.kind === "floor" ? "Floor" : "Layer"}
