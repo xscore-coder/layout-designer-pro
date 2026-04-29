@@ -47,6 +47,7 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
   const [dashboardOpen, setDashboardOpen] = useState(false);
   const [clearOpen, setClearOpen] = useState(false);
   const [clearConfirmText, setClearConfirmText] = useState("");
+  const [resetOpen, setResetOpen] = useState(false);
   const [mergeImportOpen, setMergeImportOpen] = useState(false);
   const [pendingRows, setPendingRows] = useState<IncomingRow[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -279,11 +280,10 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
           </TooltipTrigger><TooltipContent>Toggle dark mode</TooltipContent></Tooltip>
 
           <Tooltip><TooltipTrigger asChild>
-            <Button size="icon" variant="ghost"
-              onClick={() => { if (confirm("Reset everything?")) reset(); }}>
+            <Button size="icon" variant="ghost" onClick={() => setResetOpen(true)}>
               <Trash2 className="h-4 w-4 text-destructive" />
             </Button>
-          </TooltipTrigger><TooltipContent>Reset all</TooltipContent></Tooltip>
+          </TooltipTrigger><TooltipContent>Reset all (delete every floor)</TooltipContent></Tooltip>
         </div>
       </div>
 
