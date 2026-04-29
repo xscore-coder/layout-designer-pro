@@ -85,15 +85,20 @@ export function Inspector() {
   }
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="p-4 border-b border-border flex items-center gap-2">
-        <div className="h-8 w-8 rounded-md shrink-0" style={{ backgroundColor: `hsl(${zone.color})` }} />
+    <div className="h-full flex flex-col animate-fade-in">
+      <div className="p-4 border-b border-border bg-gradient-to-br from-card to-muted/30 flex items-center gap-3">
+        <div
+          className="h-10 w-10 rounded-lg shrink-0 ring-2 ring-border shadow-sm"
+          style={{ backgroundColor: `hsl(${zone.color})` }}
+        />
         <div className="flex-1 min-w-0">
-          <p className="text-xs text-muted-foreground uppercase tracking-wide">Zone</p>
-          <p className="font-semibold truncate">{zone.name}</p>
+          <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">
+            {zone.kind === "space" ? "Space" : "Zone"}
+          </p>
+          <p className="font-semibold truncate text-sm">{zone.name}</p>
         </div>
-        <Button size="icon" variant="ghost" onClick={() => toggleLock(zone.id)} title={zone.locked ? "Unlock" : "Lock"}>
-          {zone.locked ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
+        <Button size="icon" variant="ghost" className="shrink-0" onClick={() => toggleLock(zone.id)} title={zone.locked ? "Unlock" : "Lock"}>
+          {zone.locked ? <Lock className="h-4 w-4 text-warning" /> : <Unlock className="h-4 w-4" />}
         </Button>
       </div>
 
