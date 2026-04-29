@@ -69,12 +69,23 @@ const Index = () => {
                 <Button
                   size="icon"
                   variant="default"
-                  className="fixed bottom-20 left-3 z-30 rounded-full shadow-lg h-12 w-12 print:hidden"
-                  aria-label="Open layers"
+                  className="fixed bottom-4 left-3 z-30 rounded-full shadow-lg h-12 w-12 print:hidden"
+                  aria-label="Open floors and zones panel"
                 >
                   <PanelLeft className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
+              <SheetContent side="left" className="w-[85vw] max-w-[320px] p-0 flex flex-col">
+                <SheetHeader className="px-4 py-3 border-b border-border">
+                  <SheetTitle>Floors & Zones</SheetTitle>
+                </SheetHeader>
+                <div className="flex-1 overflow-y-auto flex flex-col">
+                  <FloorList />
+                  <ZoneList />
+                  <LayersPanel />
+                </div>
+              </SheetContent>
+            </Sheet>
               <SheetContent side="left" className="w-[85vw] max-w-[320px] p-0 flex flex-col">
                 <SheetHeader className="px-4 py-3 border-b border-border">
                   <SheetTitle>Floors & Zones</SheetTitle>
