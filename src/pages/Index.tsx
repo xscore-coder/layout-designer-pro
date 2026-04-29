@@ -69,8 +69,8 @@ const Index = () => {
                 <Button
                   size="icon"
                   variant="default"
-                  className="fixed bottom-20 left-3 z-30 rounded-full shadow-lg h-12 w-12 print:hidden"
-                  aria-label="Open layers"
+                  className="fixed bottom-4 left-3 z-30 rounded-full shadow-lg h-12 w-12 print:hidden"
+                  aria-label="Open floors and zones panel"
                 >
                   <PanelLeft className="h-5 w-5" />
                 </Button>
@@ -92,7 +92,7 @@ const Index = () => {
                 <Button
                   size="icon"
                   variant="default"
-                  className="fixed bottom-20 right-3 z-30 rounded-full shadow-lg h-12 w-12 print:hidden"
+                  className="fixed bottom-4 right-3 z-30 rounded-full shadow-lg h-12 w-12 print:hidden"
                   aria-label="Open inspector"
                 >
                   <PanelRight className="h-5 w-5" />
