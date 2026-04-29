@@ -13,7 +13,9 @@ import { Slider } from "@/components/ui/slider";
 import { ColorPicker } from "./ColorPicker";
 import {
   Lock, Unlock, Copy, Trash2, Plus, AlertTriangle, Info, Ungroup, X, ShieldCheck, Sparkles,
+  Monitor, MinusCircle,
 } from "lucide-react";
+import type { SeatType } from "@/types/floorplan";
 import { toast } from "sonner";
 
 /** Shared quick-pick note templates (English). */
@@ -290,6 +292,34 @@ export function Inspector() {
                   </div>
 
                   <fieldset disabled={seatLocked} className="space-y-3 disabled:opacity-60">
+                    <div>
+                      <Label className="mb-1.5 block">Cell Type</Label>
+                      <div className="grid grid-cols-3 gap-1.5">
+                        {([
+                          { type: "pc" as SeatType, label: "PC", Icon: Monitor, cls: "data-[active=true]:bg-seat-agent data-[active=true]:text-white data-[active=true]:border-seat-agent" },
+                          { type: "problem" as SeatType, label: "Problem", Icon: AlertTriangle, cls: "data-[active=true]:bg-seat-problem data-[active=true]:text-white data-[active=true]:border-seat-problem" },
+                          { type: "empty" as SeatType, label: "Empty", Icon: MinusCircle, cls: "data-[active=true]:bg-muted data-[active=true]:text-foreground" },
+                        ]).map(({ type, label, Icon, cls }) => {
+                          const active = seat.type === type;
+                          return (
+                            <button
+                              key={type}
+                              type="button"
+                              data-active={active}
+                              onClick={() => {
+                                if (seat.type === type) return;
+                                updateSeat(zone.id, seat.id, { type });
+                                toast.success(`Set to ${label}`);
+                              }}
+                              className={`flex flex-col items-center justify-center gap-1 rounded-md border border-border bg-card hover:bg-muted/60 transition-colors py-2 text-[11px] font-medium ${cls}`}
+                            >
+                              <Icon className="h-3.5 w-3.5" />
+                              {label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
                     <div>
                       <Label>PC Number</Label>
                       <Input
