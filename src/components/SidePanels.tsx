@@ -105,11 +105,12 @@ export function FloorList() {
 
   return (
     <div className="border-b border-border">
-      <div className="flex items-center justify-between px-3 py-2">
-        <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+      <div className="flex items-center justify-between px-3 py-2.5 bg-gradient-to-r from-muted/40 to-transparent">
+        <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
           <Layers className="h-3.5 w-3.5" /> Floors
+          <span className="ml-1 px-1.5 py-px rounded-full bg-muted text-[9px] font-mono text-muted-foreground/80">{floors.length}</span>
         </div>
-        <Button size="icon" variant="ghost" className="h-6 w-6" onClick={addFloor}>
+        <Button size="icon" variant="ghost" className="h-6 w-6 hover:bg-primary/10 hover:text-primary" onClick={addFloor} title="Add floor">
           <Plus className="h-3.5 w-3.5" />
         </Button>
       </div>
