@@ -168,13 +168,6 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
       window.removeEventListener("mouseup", onUp);
     };
   }, [lasso, zoom, floor.zones, selectedZoneIds, selectMany, selectSeats, clearSelection]);
-    window.addEventListener("mousemove", onMove);
-    window.addEventListener("mouseup", onUp);
-    return () => {
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("mouseup", onUp);
-    };
-  }, [lasso, zoom, floor.zones, selectedZoneIds, selectMany, clearSelection]);
 
   const heatmapMax = Math.max(
     1,
