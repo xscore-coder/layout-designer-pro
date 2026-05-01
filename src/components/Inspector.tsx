@@ -276,6 +276,11 @@ export function Inspector() {
                   <div className="flex items-center gap-2 flex-wrap">
                     <Badge variant="outline" className="font-mono">PC {seat.pcNumber}</Badge>
                     <Badge>{seat.type}</Badge>
+                    {seat.hasProblem && (
+                      <Badge variant="destructive" className="gap-1">
+                        <AlertTriangle className="h-3 w-3" /> Problem
+                      </Badge>
+                    )}
                     {seat.problemCount > 0 && (
                       <Badge variant="destructive">
                         <AlertTriangle className="h-3 w-3 mr-1" /> {seat.problemCount}
