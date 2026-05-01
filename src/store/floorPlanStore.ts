@@ -569,7 +569,18 @@ export const useFloorPlan = create<Store>()(
           }
           return { selectedSeatId: id, selectedSeatIds: [id] };
         }),
-      selectSeats: (ids) => set({ selectedSeatIds: ids, selectedSeatId: ids[ids.length - 1] ?? null }),
+      selectSeats: (ids) =>
+        set((s) => {
+          const cur = s.selectedSeatIds;
+          if (cur.length === ids.length) {
+            const a = [...cur].sort();
+            const b = [...ids].sort();
+            let same = true;
+            for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) { same = false; break; }
+            if (same) return {};
+          }
+          return { selectedSeatIds: ids, selectedSeatId: ids[ids.length - 1] ?? null };
+        }),
       clearSeatSelection: () => set({ selectedSeatId: null, selectedSeatIds: [] }),
 
       bulkUpdateSelectedSeats: (patch) =>
@@ -577,6 +588,10 @@ export const useFloorPlan = create<Store>()(
           const ids = new Set(s.selectedSeatIds.length ? s.selectedSeatIds : s.selectedSeatId ? [s.selectedSeatId] : []);
           if (!ids.size) return {};
           let count = 0;
+          const auto =
+            "lastUpdate" in patch
+              ? {}
+              : { lastUpdate: new Date().toISOString().slice(0, 10) };
           return withHistory(s, {
             floors: s.floors.map((f) => ({
               ...f,
@@ -586,7 +601,7 @@ export const useFloorPlan = create<Store>()(
                   if (!ids.has(seat.id)) return seat;
                   if (seat.locked && !("locked" in patch)) return seat;
                   count++;
-                  return { ...seat, ...patch };
+                  return { ...seat, ...patch, ...auto };
                 }),
               })),
             })),
@@ -599,6 +614,7 @@ export const useFloorPlan = create<Store>()(
           const ids = new Set(s.selectedSeatIds.length ? s.selectedSeatIds : s.selectedSeatId ? [s.selectedSeatId] : []);
           if (!ids.size) return {};
           let count = 0;
+          const today = new Date().toISOString().slice(0, 10);
           return withHistory(s, {
             floors: s.floors.map((f) => ({
               ...f,
@@ -610,6 +626,7 @@ export const useFloorPlan = create<Store>()(
                   return {
                     ...seat,
                     type,
+                    lastUpdate: today,
                     history: [
                       { id: uid(), date: new Date().toISOString(), type: "change" as const, description: `Bulk → ${type}` },
                       ...seat.history,
