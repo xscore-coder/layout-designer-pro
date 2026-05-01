@@ -27,8 +27,8 @@ export function DashboardDialog({ open, onOpenChange }: Props) {
       z.seats.forEach((s) => {
         total++;
         problems += s.problemCount;
-        if (s.type === "pc") working++;
-        else if (s.type === "problem") broken++;
+        if (s.hasProblem) broken++;
+        else if (s.type === "pc") working++;
         else empty++;
       });
     });

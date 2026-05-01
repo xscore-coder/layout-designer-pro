@@ -39,10 +39,10 @@ function buildData(floors: ReturnType<typeof useFloorPlan.getState>["floors"]): 
     for (const z of f.zones) {
       if (z.kind !== "zone") continue;
       const seats = z.seats.length;
-      const occupied = z.seats.filter((s) => s.type === "pc" || s.type === "problem").length;
+      const occupied = z.seats.filter((s) => s.type === "pc").length;
       const problems = z.seats.reduce((a, s) => a + s.problemCount, 0);
-      const broken = z.seats.filter((s) => s.type === "problem").length;
-      const working = z.seats.filter((s) => s.type === "pc").length;
+      const broken = z.seats.filter((s) => s.hasProblem).length;
+      const working = z.seats.filter((s) => s.type === "pc" && !s.hasProblem).length;
       tBroken += broken; tWorking += working;
       const topIssues = z.seats
         .filter((s) => s.problemCount > 0)

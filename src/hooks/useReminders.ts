@@ -75,7 +75,7 @@ function pushSeatReminders(out: Reminder[], floor: Floor, zone: Zone, seat: Seat
   }
 
   // Stale problem
-  if (seat.type === "problem" || seat.problemCount > 0) {
+  if (seat.hasProblem || seat.problemCount > 0) {
     const age = daysAgo(seat.lastUpdate);
     if (age === undefined) {
       out.push({
