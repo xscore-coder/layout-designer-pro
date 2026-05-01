@@ -433,7 +433,7 @@ export const useFloorPlan = create<Store>()(
         ),
 
       cycleSeatType: (zoneId, seatId) => {
-        const order: SeatType[] = ["pc", "problem", "empty"];
+        const order: SeatType[] = ["pc", "empty"];
         set((s) =>
           withHistory(s, {
             floors: updateActiveFloor(s, (f) => ({
@@ -448,6 +448,7 @@ export const useFloorPlan = create<Store>()(
                     return {
                       ...seat,
                       type: next,
+                      lastUpdate: new Date().toISOString().slice(0, 10),
                       history: [
                         { id: uid(), date: new Date().toISOString(), type: "change" as const, description: `Type → ${next}` },
                         ...seat.history,
