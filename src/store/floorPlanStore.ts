@@ -476,7 +476,12 @@ export const useFloorPlan = create<Store>()(
                     if (seat.id !== seatId) return seat;
                     // When seat is locked, only allow toggling the `locked` flag itself.
                     if (seat.locked && !("locked" in patch)) return seat;
-                    return { ...seat, ...patch };
+                    // Auto-stamp lastUpdate unless caller provides one explicitly
+                    const auto =
+                      "lastUpdate" in patch
+                        ? {}
+                        : { lastUpdate: new Date().toISOString().slice(0, 10) };
+                    return { ...seat, ...patch, ...auto };
                   }),
                 };
               }),
@@ -520,7 +525,20 @@ export const useFloorPlan = create<Store>()(
           }
           return { selectedZoneId: id, selectedZoneIds: [id], selectedSeatId: null, selectedSeatIds: [] };
         }),
-      selectMany: (ids) => set({ selectedZoneIds: ids, selectedZoneId: ids[ids.length - 1] ?? null }),
+      selectMany: (ids) =>
+        set((s) => {
+          // Guard: only update state if the selection actually changed.
+          // Prevents infinite render loops when callers pass equivalent arrays.
+          const cur = s.selectedZoneIds;
+          if (cur.length === ids.length) {
+            const a = [...cur].sort();
+            const b = [...ids].sort();
+            let same = true;
+            for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) { same = false; break; }
+            if (same) return {};
+          }
+          return { selectedZoneIds: ids, selectedZoneId: ids[ids.length - 1] ?? null };
+        }),
       clearSelection: () =>
         set({ selectedZoneId: null, selectedZoneIds: [], selectedSeatId: null, selectedSeatIds: [] }),
 
