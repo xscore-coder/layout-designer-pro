@@ -759,6 +759,7 @@ export const useFloorPlan = create<Store>()(
         set((s) => {
           const map = new Map(rows.map((r) => [r.pc, r]));
           let updated = 0;
+          const today = new Date().toISOString().slice(0, 10);
           const floors = s.floors.map((f) => ({
             ...f,
             zones: f.zones.map((z) => ({
@@ -771,7 +772,8 @@ export const useFloorPlan = create<Store>()(
                 return {
                   ...seat,
                   problemCount: seat.problemCount + problems,
-                  type: problems > 0 ? "problem" : seat.type,
+                  hasProblem: problems > 0 ? true : seat.hasProblem,
+                  lastUpdate: today,
                   history:
                     problems > 0
                       ? [
@@ -799,6 +801,7 @@ export const useFloorPlan = create<Store>()(
           const allowed = new Set(selectedPcs);
           const map = new Map(rows.filter((r) => allowed.has(r.pc)).map((r) => [r.pc, r]));
           let updated = 0;
+          const today = new Date().toISOString().slice(0, 10);
           const floors = s.floors.map((f) => ({
             ...f,
             zones: f.zones.map((z) => ({
@@ -811,7 +814,8 @@ export const useFloorPlan = create<Store>()(
                 return {
                   ...seat,
                   problemCount: seat.problemCount + problems,
-                  type: problems > 0 ? "problem" : seat.type,
+                  hasProblem: problems > 0 ? true : seat.hasProblem,
+                  lastUpdate: today,
                   history:
                     problems > 0
                       ? [
