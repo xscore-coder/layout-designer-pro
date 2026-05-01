@@ -456,18 +456,9 @@ export function Inspector() {
                       <div className="flex items-center justify-between mb-1">
                         <Label>Last Update</Label>
                         <div className="flex items-center gap-1">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="h-6 px-2 text-xs"
-                            onClick={() => {
-                              const today = new Date().toISOString().slice(0, 10);
-                              updateSeat(zone.id, seat.id, { lastUpdate: today });
-                              toast.success("Set to today");
-                            }}
-                          >
-                            Today
-                          </Button>
+                          <span className="text-[10px] text-muted-foreground">
+                            (auto on edit)
+                          </span>
                           {seat.lastUpdate && (
                             <Button
                               size="sm"
@@ -483,12 +474,54 @@ export function Inspector() {
                           )}
                         </div>
                       </div>
-                      <Input
-                        dir="auto"
-                        value={seat.lastUpdate ?? ""}
-                        onChange={(e) => updateSeat(zone.id, seat.id, { lastUpdate: e.target.value })}
-                        placeholder="e.g. 2026-04-26 أو أي تاريخ"
-                      />
+                      {(() => {
+                        const parsed = seat.lastUpdate ? parseISO(seat.lastUpdate) : undefined;
+                        const valid = parsed && isValid(parsed) ? parsed : undefined;
+                        return (
+                          <div className="flex gap-1.5">
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  className={cn(
+                                    "flex-1 justify-start text-left font-normal h-9",
+                                    !valid && "text-muted-foreground"
+                                  )}
+                                >
+                                  <CalendarIcon className="h-3.5 w-3.5 mr-2" />
+                                  {valid ? format(valid, "PPP") : <span>Pick a date</span>}
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar
+                                  mode="single"
+                                  selected={valid}
+                                  onSelect={(d) => {
+                                    if (!d) return;
+                                    const iso = format(d, "yyyy-MM-dd");
+                                    updateSeat(zone.id, seat.id, { lastUpdate: iso });
+                                    toast.success(`Date set: ${iso}`);
+                                  }}
+                                  initialFocus
+                                  className={cn("p-3 pointer-events-auto")}
+                                />
+                              </PopoverContent>
+                            </Popover>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-9 px-3 text-xs"
+                              onClick={() => {
+                                const today = new Date().toISOString().slice(0, 10);
+                                updateSeat(zone.id, seat.id, { lastUpdate: today });
+                                toast.success("Set to today");
+                              }}
+                            >
+                              Today
+                            </Button>
+                          </div>
+                        );
+                      })()}
                     </div>
 
                     <div>
