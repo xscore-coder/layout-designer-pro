@@ -19,6 +19,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
   const setZoom = useFloorPlan((s) => s.setZoom);
   const selectZone = useFloorPlan((s) => s.selectZone);
   const selectMany = useFloorPlan((s) => s.selectMany);
+  const selectSeats = useFloorPlan((s) => s.selectSeats);
   const clearSelection = useFloorPlan((s) => s.clearSelection);
   const selectAll = useFloorPlan((s) => s.selectAllZonesOnActiveFloor);
   const removeZone = useFloorPlan((s) => s.removeZone);
@@ -126,13 +127,37 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
           if (!l.additive) clearSelection();
           return null;
         }
-        const hits = floor.zones
+        // 1) Zone hits — based on geometry in stage coords
+        const zoneHits = floor.zones
           .filter((z) => !z.hidden && z.x < x + w && z.x + z.width > x && z.y < y + h && z.y + z.height > y)
           .map((z) => z.id);
-        const finalIds = l.additive
-          ? Array.from(new Set([...selectedZoneIds, ...hits]))
-          : hits;
-        selectMany(finalIds);
+        // 2) Seat hits — based on real DOM rects (handles header padding, rotations, gaps).
+        //    Marquee rect in client coords:
+        const stageRect = stage.getBoundingClientRect();
+        const clientLeft = stageRect.left + Math.min(l.x0, l.x1) * zoom;
+        const clientTop = stageRect.top + Math.min(l.y0, l.y1) * zoom;
+        const clientRight = clientLeft + w * zoom;
+        const clientBottom = clientTop + h * zoom;
+        const seatHits: string[] = [];
+        const seatEls = stage.querySelectorAll<HTMLElement>("[data-seat-id]");
+        seatEls.forEach((el) => {
+          const r = el.getBoundingClientRect();
+          if (
+            r.left < clientRight &&
+            r.right > clientLeft &&
+            r.top < clientBottom &&
+            r.bottom > clientTop
+          ) {
+            const id = el.dataset.seatId;
+            if (id) seatHits.push(id);
+          }
+        });
+        // Apply selection
+        const finalZoneIds = l.additive
+          ? Array.from(new Set([...selectedZoneIds, ...zoneHits]))
+          : zoneHits;
+        selectMany(finalZoneIds);
+        selectSeats(seatHits);
         return null;
       });
     };
@@ -142,7 +167,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
       window.removeEventListener("mousemove", onMove);
       window.removeEventListener("mouseup", onUp);
     };
-  }, [lasso, zoom, floor.zones, selectedZoneIds, selectMany, clearSelection]);
+  }, [lasso, zoom, floor.zones, selectedZoneIds, selectMany, selectSeats, clearSelection]);
 
   const heatmapMax = Math.max(
     1,

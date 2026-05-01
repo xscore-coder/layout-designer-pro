@@ -10,13 +10,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ColorPicker } from "./ColorPicker";
 import {
   Lock, Unlock, Copy, Trash2, Plus, AlertTriangle, Info, Ungroup, X, ShieldCheck, Sparkles,
-  Monitor, MinusCircle,
+  Monitor, MinusCircle, CalendarIcon,
 } from "lucide-react";
 import type { SeatType } from "@/types/floorplan";
 import { toast } from "sonner";
+import { format, parseISO, isValid } from "date-fns";
+import { cn } from "@/lib/utils";
 
 /** Shared quick-pick note templates (English). */
 const NOTE_TEMPLATES = [
@@ -271,6 +276,11 @@ export function Inspector() {
                   <div className="flex items-center gap-2 flex-wrap">
                     <Badge variant="outline" className="font-mono">PC {seat.pcNumber}</Badge>
                     <Badge>{seat.type}</Badge>
+                    {seat.hasProblem && (
+                      <Badge variant="destructive" className="gap-1">
+                        <AlertTriangle className="h-3 w-3" /> Problem
+                      </Badge>
+                    )}
                     {seat.problemCount > 0 && (
                       <Badge variant="destructive">
                         <AlertTriangle className="h-3 w-3 mr-1" /> {seat.problemCount}
@@ -321,10 +331,9 @@ export function Inspector() {
                   <fieldset disabled={seatLocked} className="space-y-3 disabled:opacity-60">
                     <div>
                       <Label className="mb-1.5 block">Cell Type</Label>
-                      <div className="grid grid-cols-3 gap-1.5">
+                      <div className="grid grid-cols-2 gap-1.5">
                         {([
                           { type: "pc" as SeatType, label: "PC", Icon: Monitor, cls: "data-[active=true]:bg-seat-agent data-[active=true]:text-white data-[active=true]:border-seat-agent" },
-                          { type: "problem" as SeatType, label: "Problem", Icon: AlertTriangle, cls: "data-[active=true]:bg-seat-problem data-[active=true]:text-white data-[active=true]:border-seat-problem" },
                           { type: "empty" as SeatType, label: "Empty", Icon: MinusCircle, cls: "data-[active=true]:bg-muted data-[active=true]:text-foreground" },
                         ]).map(({ type, label, Icon, cls }) => {
                           const active = seat.type === type;
@@ -346,6 +355,40 @@ export function Inspector() {
                           );
                         })}
                       </div>
+                    </div>
+
+                    {/* Independent Has-Problem toggle */}
+                    <div
+                      className={cn(
+                        "rounded-md border p-2.5 flex items-center gap-3 transition-colors",
+                        seat.hasProblem
+                          ? "bg-destructive/10 border-destructive/40"
+                          : "bg-muted/30 border-border"
+                      )}
+                    >
+                      <AlertTriangle
+                        className={cn(
+                          "h-4 w-4 shrink-0",
+                          seat.hasProblem ? "text-destructive" : "text-muted-foreground"
+                        )}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-semibold">
+                          {seat.hasProblem ? "Has Problem" : "No Problem"}
+                        </p>
+                        <p className="text-[10px] text-muted-foreground leading-tight">
+                          {seat.hasProblem
+                            ? "الخلية فيها مشكلة — هتظهر بلون أحمر"
+                            : "علّم الـ toggle لو الخلية فيها مشكلة"}
+                        </p>
+                      </div>
+                      <Switch
+                        checked={!!seat.hasProblem}
+                        onCheckedChange={(v) => {
+                          updateSeat(zone.id, seat.id, { hasProblem: v });
+                          toast.success(v ? "Marked as Problem" : "Cleared Problem");
+                        }}
+                      />
                     </div>
                     <div>
                       <Label>PC Number</Label>
@@ -418,18 +461,9 @@ export function Inspector() {
                       <div className="flex items-center justify-between mb-1">
                         <Label>Last Update</Label>
                         <div className="flex items-center gap-1">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="h-6 px-2 text-xs"
-                            onClick={() => {
-                              const today = new Date().toISOString().slice(0, 10);
-                              updateSeat(zone.id, seat.id, { lastUpdate: today });
-                              toast.success("Set to today");
-                            }}
-                          >
-                            Today
-                          </Button>
+                          <span className="text-[10px] text-muted-foreground">
+                            (auto on edit)
+                          </span>
                           {seat.lastUpdate && (
                             <Button
                               size="sm"
@@ -445,12 +479,54 @@ export function Inspector() {
                           )}
                         </div>
                       </div>
-                      <Input
-                        dir="auto"
-                        value={seat.lastUpdate ?? ""}
-                        onChange={(e) => updateSeat(zone.id, seat.id, { lastUpdate: e.target.value })}
-                        placeholder="e.g. 2026-04-26 أو أي تاريخ"
-                      />
+                      {(() => {
+                        const parsed = seat.lastUpdate ? parseISO(seat.lastUpdate) : undefined;
+                        const valid = parsed && isValid(parsed) ? parsed : undefined;
+                        return (
+                          <div className="flex gap-1.5">
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  className={cn(
+                                    "flex-1 justify-start text-left font-normal h-9",
+                                    !valid && "text-muted-foreground"
+                                  )}
+                                >
+                                  <CalendarIcon className="h-3.5 w-3.5 mr-2" />
+                                  {valid ? format(valid, "PPP") : <span>Pick a date</span>}
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar
+                                  mode="single"
+                                  selected={valid}
+                                  onSelect={(d) => {
+                                    if (!d) return;
+                                    const iso = format(d, "yyyy-MM-dd");
+                                    updateSeat(zone.id, seat.id, { lastUpdate: iso });
+                                    toast.success(`Date set: ${iso}`);
+                                  }}
+                                  initialFocus
+                                  className={cn("p-3 pointer-events-auto")}
+                                />
+                              </PopoverContent>
+                            </Popover>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-9 px-3 text-xs"
+                              onClick={() => {
+                                const today = new Date().toISOString().slice(0, 10);
+                                updateSeat(zone.id, seat.id, { lastUpdate: today });
+                                toast.success("Set to today");
+                              }}
+                            >
+                              Today
+                            </Button>
+                          </div>
+                        );
+                      })()}
                     </div>
 
                     <div>

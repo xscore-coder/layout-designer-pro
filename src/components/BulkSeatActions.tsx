@@ -5,7 +5,6 @@ import { toast } from "sonner";
 
 /**
  * Floating bulk-action bar that appears when 2+ seats are selected.
- * Lets the user apply a status / lock / clear notes to all selected seats at once.
  */
 export function BulkSeatActions() {
   const ids = useFloorPlan((s) => s.selectedSeatIds);
@@ -27,18 +26,26 @@ export function BulkSeatActions() {
 
         <Button size="sm" variant="ghost" className="h-7 px-2 gap-1"
           onClick={() => { bulkSetType("pc"); toast.success(`${ids.length} → PC`); }}
-          title="Set status: PC">
+          title="Set type: PC">
           <Monitor className="h-3.5 w-3.5" /> PC
-        </Button>
-        <Button size="sm" variant="ghost" className="h-7 px-2 gap-1 text-destructive"
-          onClick={() => { bulkSetType("problem"); toast.success(`${ids.length} → Problem`); }}
-          title="Set status: Problem">
-          <AlertTriangle className="h-3.5 w-3.5" /> Problem
         </Button>
         <Button size="sm" variant="ghost" className="h-7 px-2 gap-1"
           onClick={() => { bulkSetType("empty"); toast.success(`${ids.length} → Empty`); }}
-          title="Set status: Empty">
+          title="Set type: Empty">
           <MinusCircle className="h-3.5 w-3.5" /> Empty
+        </Button>
+
+        <div className="h-5 w-px bg-border mx-1" />
+
+        <Button size="sm" variant="ghost" className="h-7 px-2 gap-1 text-destructive"
+          onClick={() => { bulkUpdate({ hasProblem: true }); toast.success(`${ids.length} → Problem`); }}
+          title="Mark all as Problem">
+          <AlertTriangle className="h-3.5 w-3.5" /> Problem
+        </Button>
+        <Button size="sm" variant="ghost" className="h-7 px-2 gap-1"
+          onClick={() => { bulkUpdate({ hasProblem: false }); toast.success(`Problems cleared`); }}
+          title="Clear Problem flag">
+          <X className="h-3.5 w-3.5" /> No Problem
         </Button>
 
         <div className="h-5 w-px bg-border mx-1" />

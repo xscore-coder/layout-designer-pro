@@ -433,7 +433,7 @@ export const useFloorPlan = create<Store>()(
         ),
 
       cycleSeatType: (zoneId, seatId) => {
-        const order: SeatType[] = ["pc", "problem", "empty"];
+        const order: SeatType[] = ["pc", "empty"];
         set((s) =>
           withHistory(s, {
             floors: updateActiveFloor(s, (f) => ({
@@ -448,6 +448,7 @@ export const useFloorPlan = create<Store>()(
                     return {
                       ...seat,
                       type: next,
+                      lastUpdate: new Date().toISOString().slice(0, 10),
                       history: [
                         { id: uid(), date: new Date().toISOString(), type: "change" as const, description: `Type → ${next}` },
                         ...seat.history,
@@ -475,7 +476,12 @@ export const useFloorPlan = create<Store>()(
                     if (seat.id !== seatId) return seat;
                     // When seat is locked, only allow toggling the `locked` flag itself.
                     if (seat.locked && !("locked" in patch)) return seat;
-                    return { ...seat, ...patch };
+                    // Auto-stamp lastUpdate unless caller provides one explicitly
+                    const auto =
+                      "lastUpdate" in patch
+                        ? {}
+                        : { lastUpdate: new Date().toISOString().slice(0, 10) };
+                    return { ...seat, ...patch, ...auto };
                   }),
                 };
               }),
@@ -519,7 +525,20 @@ export const useFloorPlan = create<Store>()(
           }
           return { selectedZoneId: id, selectedZoneIds: [id], selectedSeatId: null, selectedSeatIds: [] };
         }),
-      selectMany: (ids) => set({ selectedZoneIds: ids, selectedZoneId: ids[ids.length - 1] ?? null }),
+      selectMany: (ids) =>
+        set((s) => {
+          // Guard: only update state if the selection actually changed.
+          // Prevents infinite render loops when callers pass equivalent arrays.
+          const cur = s.selectedZoneIds;
+          if (cur.length === ids.length) {
+            const a = [...cur].sort();
+            const b = [...ids].sort();
+            let same = true;
+            for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) { same = false; break; }
+            if (same) return {};
+          }
+          return { selectedZoneIds: ids, selectedZoneId: ids[ids.length - 1] ?? null };
+        }),
       clearSelection: () =>
         set({ selectedZoneId: null, selectedZoneIds: [], selectedSeatId: null, selectedSeatIds: [] }),
 
@@ -550,7 +569,18 @@ export const useFloorPlan = create<Store>()(
           }
           return { selectedSeatId: id, selectedSeatIds: [id] };
         }),
-      selectSeats: (ids) => set({ selectedSeatIds: ids, selectedSeatId: ids[ids.length - 1] ?? null }),
+      selectSeats: (ids) =>
+        set((s) => {
+          const cur = s.selectedSeatIds;
+          if (cur.length === ids.length) {
+            const a = [...cur].sort();
+            const b = [...ids].sort();
+            let same = true;
+            for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) { same = false; break; }
+            if (same) return {};
+          }
+          return { selectedSeatIds: ids, selectedSeatId: ids[ids.length - 1] ?? null };
+        }),
       clearSeatSelection: () => set({ selectedSeatId: null, selectedSeatIds: [] }),
 
       bulkUpdateSelectedSeats: (patch) =>
@@ -558,6 +588,10 @@ export const useFloorPlan = create<Store>()(
           const ids = new Set(s.selectedSeatIds.length ? s.selectedSeatIds : s.selectedSeatId ? [s.selectedSeatId] : []);
           if (!ids.size) return {};
           let count = 0;
+          const auto =
+            "lastUpdate" in patch
+              ? {}
+              : { lastUpdate: new Date().toISOString().slice(0, 10) };
           return withHistory(s, {
             floors: s.floors.map((f) => ({
               ...f,
@@ -567,7 +601,7 @@ export const useFloorPlan = create<Store>()(
                   if (!ids.has(seat.id)) return seat;
                   if (seat.locked && !("locked" in patch)) return seat;
                   count++;
-                  return { ...seat, ...patch };
+                  return { ...seat, ...patch, ...auto };
                 }),
               })),
             })),
@@ -580,6 +614,7 @@ export const useFloorPlan = create<Store>()(
           const ids = new Set(s.selectedSeatIds.length ? s.selectedSeatIds : s.selectedSeatId ? [s.selectedSeatId] : []);
           if (!ids.size) return {};
           let count = 0;
+          const today = new Date().toISOString().slice(0, 10);
           return withHistory(s, {
             floors: s.floors.map((f) => ({
               ...f,
@@ -591,6 +626,7 @@ export const useFloorPlan = create<Store>()(
                   return {
                     ...seat,
                     type,
+                    lastUpdate: today,
                     history: [
                       { id: uid(), date: new Date().toISOString(), type: "change" as const, description: `Bulk → ${type}` },
                       ...seat.history,
@@ -758,6 +794,7 @@ export const useFloorPlan = create<Store>()(
         set((s) => {
           const map = new Map(rows.map((r) => [r.pc, r]));
           let updated = 0;
+          const today = new Date().toISOString().slice(0, 10);
           const floors = s.floors.map((f) => ({
             ...f,
             zones: f.zones.map((z) => ({
@@ -770,7 +807,8 @@ export const useFloorPlan = create<Store>()(
                 return {
                   ...seat,
                   problemCount: seat.problemCount + problems,
-                  type: problems > 0 ? "problem" : seat.type,
+                  hasProblem: problems > 0 ? true : seat.hasProblem,
+                  lastUpdate: today,
                   history:
                     problems > 0
                       ? [
@@ -798,6 +836,7 @@ export const useFloorPlan = create<Store>()(
           const allowed = new Set(selectedPcs);
           const map = new Map(rows.filter((r) => allowed.has(r.pc)).map((r) => [r.pc, r]));
           let updated = 0;
+          const today = new Date().toISOString().slice(0, 10);
           const floors = s.floors.map((f) => ({
             ...f,
             zones: f.zones.map((z) => ({
@@ -810,7 +849,8 @@ export const useFloorPlan = create<Store>()(
                 return {
                   ...seat,
                   problemCount: seat.problemCount + problems,
-                  type: problems > 0 ? "problem" : seat.type,
+                  hasProblem: problems > 0 ? true : seat.hasProblem,
+                  lastUpdate: today,
                   history:
                     problems > 0
                       ? [
@@ -1041,6 +1081,20 @@ export const useFloorPlan = create<Store>()(
         if (shouldDark) document.documentElement.classList.add("dark");
         if (state && !state.darkMode && sysDark) {
           state.darkMode = true;
+        }
+        // Migration: legacy seat.type === "problem" → type:"pc" + hasProblem:true
+        if (state?.floors) {
+          state.floors.forEach((f) => {
+            f.zones.forEach((z) => {
+              z.seats.forEach((seat) => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                if ((seat.type as any) === "problem") {
+                  seat.type = "pc";
+                  seat.hasProblem = true;
+                }
+              });
+            });
+          });
         }
       },
     }

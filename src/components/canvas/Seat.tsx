@@ -15,6 +15,7 @@ import {
   ContextMenuTrigger,
   ContextMenuRadioGroup,
   ContextMenuRadioItem,
+  ContextMenuCheckboxItem,
 } from "@/components/ui/context-menu";
 import { toast } from "sonner";
 
@@ -28,13 +29,11 @@ interface Props {
 const ICONS = {
   empty: MinusCircle,
   pc: Monitor,
-  problem: AlertTriangle,
 } as const;
 
-const TYPE_BG: Record<string, string> = {
+const TYPE_BG: Record<SeatType, string> = {
   empty: "bg-seat-empty text-muted-foreground",
   pc: "bg-seat-agent text-white",
-  problem: "bg-seat-problem text-white",
 };
 
 export function Seat({ seat, zone, highlighted, heatmapMax }: Props) {
@@ -47,7 +46,6 @@ export function Seat({ seat, zone, highlighted, heatmapMax }: Props) {
   // Inline note popover
   const [noteOpen, setNoteOpen] = useState(false);
   const [draftNote, setDraftNote] = useState(seat.note ?? "");
-  // Defer single-click select to allow double-click to open note
   const clickTimerRef = useRef<number | null>(null);
 
   const Icon = ICONS[seat.type] ?? MinusCircle;
@@ -75,9 +73,18 @@ export function Seat({ seat, zone, highlighted, heatmapMax }: Props) {
     toast.success(`Set to ${t.toUpperCase()}`);
   };
 
+  const toggleProblem = () => {
+    if (seat.locked) {
+      toast.error("Cell is locked");
+      return;
+    }
+    const next = !seat.hasProblem;
+    updateSeat(zone.id, seat.id, { hasProblem: next });
+    toast.success(next ? "Marked as Problem" : "Cleared Problem");
+  };
+
   const TYPE_LABEL: Record<SeatType, string> = {
     pc: "PC (Active)",
-    problem: "Problem",
     empty: "Empty",
   };
 
@@ -94,6 +101,8 @@ export function Seat({ seat, zone, highlighted, heatmapMax }: Props) {
           <PopoverTrigger asChild>
             <button
               type="button"
+              data-seat-id={seat.id}
+              data-zone-id={zone.id}
               onClick={(e) => {
                 e.stopPropagation();
                 const additive = e.metaKey || e.ctrlKey;
@@ -102,8 +111,6 @@ export function Seat({ seat, zone, highlighted, heatmapMax }: Props) {
                   select(seat.id, { additive, range });
                   return;
                 }
-                // Single click = select only (no type cycling).
-                // Defer slightly so a double-click can intercept and open note.
                 if (clickTimerRef.current) window.clearTimeout(clickTimerRef.current);
                 clickTimerRef.current = window.setTimeout(() => {
                   select(seat.id);
@@ -122,12 +129,13 @@ export function Seat({ seat, zone, highlighted, heatmapMax }: Props) {
                 setDraftNote(seat.note ?? "");
                 setNoteOpen(true);
               }}
-              title={`PC ${seat.pcNumber}${seat.lockNumber ? ` • Lock ${seat.lockNumber}` : ""}${seat.locked ? " • 🔒 Locked" : ""}${seat.problemCount ? ` • ${seat.problemCount} issue(s)` : ""}${seat.note ? `\n📝 ${seat.note}` : ""}\n(Click=select • Double-click=note • Right-click=change type)`}
+              title={`PC ${seat.pcNumber}${seat.lockNumber ? ` • Lock ${seat.lockNumber}` : ""}${seat.locked ? " • 🔒 Locked" : ""}${seat.hasProblem ? " • ⚠ Problem" : ""}${seat.problemCount ? ` • ${seat.problemCount} issue(s)` : ""}${seat.lastUpdate ? ` • ${seat.lastUpdate}` : ""}${seat.note ? `\n📝 ${seat.note}` : ""}\n(Click=select • Double-click=note • Right-click=menu)`}
               className={cn(
                 "relative h-9 w-9 rounded-md flex items-center justify-center text-[10px] font-semibold transition-all duration-150",
                 "hover:scale-110 hover:z-10 hover:shadow-lg hover:brightness-110",
                 "active:scale-95",
                 TYPE_BG[seat.type] ?? TYPE_BG.empty,
+                seat.hasProblem && "bg-seat-problem text-white",
                 selected && "ring-2 ring-ring ring-offset-2 ring-offset-card scale-105 shadow-md z-10",
                 inMultiSelection && !selected && "ring-2 ring-accent ring-offset-1 ring-offset-card",
                 highlighted && "ring-2 ring-warning animate-pulse",
@@ -142,6 +150,14 @@ export function Seat({ seat, zone, highlighted, heatmapMax }: Props) {
               )}
               {seat.locked && (
                 <span className="absolute -top-1 -right-1 text-[9px] leading-none">🔐</span>
+              )}
+              {seat.hasProblem && (
+                <span
+                  className="absolute -top-1 -left-1 h-3 w-3 rounded-full bg-destructive text-white flex items-center justify-center shadow-sm border border-card"
+                  title="Has problem"
+                >
+                  <AlertTriangle className="h-2 w-2" />
+                </span>
               )}
               {seat.note && !seat.locked && (
                 <span
@@ -244,12 +260,11 @@ export function Seat({ seat, zone, highlighted, heatmapMax }: Props) {
         </ContextMenuLabel>
         <ContextMenuSeparator />
         <ContextMenuLabel className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
-          Change Type
+          Cell Type
         </ContextMenuLabel>
         <ContextMenuRadioGroup
           value={seat.type}
           onValueChange={(v) => {
-            // ensure this seat is the selected one for context
             select(seat.id);
             setType(v as SeatType);
           }}
@@ -258,15 +273,23 @@ export function Seat({ seat, zone, highlighted, heatmapMax }: Props) {
             <Monitor className="h-3.5 w-3.5 mr-2 text-seat-agent" />
             {TYPE_LABEL.pc}
           </ContextMenuRadioItem>
-          <ContextMenuRadioItem value="problem" disabled={seat.locked}>
-            <AlertTriangle className="h-3.5 w-3.5 mr-2 text-seat-problem" />
-            {TYPE_LABEL.problem}
-          </ContextMenuRadioItem>
           <ContextMenuRadioItem value="empty" disabled={seat.locked}>
             <MinusCircle className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
             {TYPE_LABEL.empty}
           </ContextMenuRadioItem>
         </ContextMenuRadioGroup>
+        <ContextMenuSeparator />
+        <ContextMenuCheckboxItem
+          checked={!!seat.hasProblem}
+          disabled={seat.locked}
+          onCheckedChange={() => {
+            select(seat.id);
+            toggleProblem();
+          }}
+        >
+          <AlertTriangle className="h-3.5 w-3.5 mr-2 text-seat-problem" />
+          Has problem
+        </ContextMenuCheckboxItem>
         <ContextMenuSeparator />
         <ContextMenuItem
           disabled={seat.locked}
