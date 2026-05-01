@@ -1082,6 +1082,20 @@ export const useFloorPlan = create<Store>()(
         if (state && !state.darkMode && sysDark) {
           state.darkMode = true;
         }
+        // Migration: legacy seat.type === "problem" → type:"pc" + hasProblem:true
+        if (state?.floors) {
+          state.floors.forEach((f) => {
+            f.zones.forEach((z) => {
+              z.seats.forEach((seat) => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                if ((seat.type as any) === "problem") {
+                  seat.type = "pc";
+                  seat.hasProblem = true;
+                }
+              });
+            });
+          });
+        }
       },
     }
   )
