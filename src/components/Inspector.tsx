@@ -326,10 +326,9 @@ export function Inspector() {
                   <fieldset disabled={seatLocked} className="space-y-3 disabled:opacity-60">
                     <div>
                       <Label className="mb-1.5 block">Cell Type</Label>
-                      <div className="grid grid-cols-3 gap-1.5">
+                      <div className="grid grid-cols-2 gap-1.5">
                         {([
                           { type: "pc" as SeatType, label: "PC", Icon: Monitor, cls: "data-[active=true]:bg-seat-agent data-[active=true]:text-white data-[active=true]:border-seat-agent" },
-                          { type: "problem" as SeatType, label: "Problem", Icon: AlertTriangle, cls: "data-[active=true]:bg-seat-problem data-[active=true]:text-white data-[active=true]:border-seat-problem" },
                           { type: "empty" as SeatType, label: "Empty", Icon: MinusCircle, cls: "data-[active=true]:bg-muted data-[active=true]:text-foreground" },
                         ]).map(({ type, label, Icon, cls }) => {
                           const active = seat.type === type;
@@ -351,6 +350,40 @@ export function Inspector() {
                           );
                         })}
                       </div>
+                    </div>
+
+                    {/* Independent Has-Problem toggle */}
+                    <div
+                      className={cn(
+                        "rounded-md border p-2.5 flex items-center gap-3 transition-colors",
+                        seat.hasProblem
+                          ? "bg-destructive/10 border-destructive/40"
+                          : "bg-muted/30 border-border"
+                      )}
+                    >
+                      <AlertTriangle
+                        className={cn(
+                          "h-4 w-4 shrink-0",
+                          seat.hasProblem ? "text-destructive" : "text-muted-foreground"
+                        )}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-semibold">
+                          {seat.hasProblem ? "Has Problem" : "No Problem"}
+                        </p>
+                        <p className="text-[10px] text-muted-foreground leading-tight">
+                          {seat.hasProblem
+                            ? "الخلية فيها مشكلة — هتظهر بلون أحمر"
+                            : "علّم الـ toggle لو الخلية فيها مشكلة"}
+                        </p>
+                      </div>
+                      <Switch
+                        checked={!!seat.hasProblem}
+                        onCheckedChange={(v) => {
+                          updateSeat(zone.id, seat.id, { hasProblem: v });
+                          toast.success(v ? "Marked as Problem" : "Cleared Problem");
+                        }}
+                      />
                     </div>
                     <div>
                       <Label>PC Number</Label>
