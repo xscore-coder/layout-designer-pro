@@ -10,13 +10,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ColorPicker } from "./ColorPicker";
 import {
   Lock, Unlock, Copy, Trash2, Plus, AlertTriangle, Info, Ungroup, X, ShieldCheck, Sparkles,
-  Monitor, MinusCircle,
+  Monitor, MinusCircle, CalendarIcon,
 } from "lucide-react";
 import type { SeatType } from "@/types/floorplan";
 import { toast } from "sonner";
+import { format, parseISO, isValid } from "date-fns";
+import { cn } from "@/lib/utils";
 
 /** Shared quick-pick note templates (English). */
 const NOTE_TEMPLATES = [
