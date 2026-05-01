@@ -1,5 +1,5 @@
 export type ZoneShape = "rect" | "rounded" | "hex" | "oval" | "rhombus" | "parallelogram";
-export type SeatType = "empty" | "pc" | "problem";
+export type SeatType = "empty" | "pc";
 export type Shift = "morning" | "evening" | "night" | "off";
 export type SpaceKind = "corridor" | "office" | "storage" | "pillar" | "blank" | "group";
 
@@ -15,6 +15,8 @@ export interface Seat {
   pcNumber: string;
   lockNumber?: string;
   type: SeatType;
+  /** Independent flag: cell has a reported problem (regardless of type). */
+  hasProblem?: boolean;
   note?: string;
   waslaSctFeedback?: string;
   /** Manual last update date (e.g. "2026-04-26") entered by the user */
