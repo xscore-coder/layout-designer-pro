@@ -665,6 +665,7 @@ export const useFloorPlan = create<Store>()(
       toggleLegend: () => set((s) => ({ showLegend: !s.showLegend })),
       toggleCompass: () => set((s) => ({ showCompass: !s.showCompass })),
       toggleScale: () => set((s) => ({ showScale: !s.showScale })),
+      toggleGrid: () => set((s) => ({ showGrid: !s.showGrid })),
       toggleCollision: () => set((s) => ({ collisionDetection: !s.collisionDetection })),
       setTheme: (t) => set({ theme: t }),
       renumberZones: () =>
