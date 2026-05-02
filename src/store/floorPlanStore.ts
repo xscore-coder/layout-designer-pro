@@ -182,6 +182,7 @@ export const useFloorPlan = create<Store>()(
       showCompass: true,
       showScale: true,
       showMiniMap: true,
+      showGrid: false,
       collisionDetection: false,
       theme: "modern",
       customPalette: [],
