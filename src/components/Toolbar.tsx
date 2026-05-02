@@ -151,7 +151,7 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
 
   return (
     <>
-      <div className="h-14 border-b border-border bg-card/70 backdrop-blur-xl flex items-center gap-1 px-2 sm:px-3 shrink-0 z-10 overflow-x-auto scrollbar-thin shadow-sm">
+      <div className="h-14 border-b border-border bg-card/70 backdrop-blur-xl flex items-center gap-1 px-2 sm:px-3 shrink-0 z-10 shadow-sm flex-nowrap min-w-0">
         {/* Brand */}
         <div className="flex items-center gap-2.5 mr-2 sm:mr-3 shrink-0">
           <div className="relative">
@@ -254,9 +254,11 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
             <LayoutDashboard className="h-4 w-4 mr-1" /> <span className="hidden lg:inline">Dashboard</span>
           </Button>
 
-          <Button size="sm" variant="ghost" onClick={() => setReportOpen(true)} className="h-8">
-            <FileBarChart className="h-4 w-4 mr-1" /> <span className="hidden lg:inline">Report</span>
-          </Button>
+          <Tooltip><TooltipTrigger asChild>
+            <Button size="icon" variant="ghost" onClick={() => setReportOpen(true)} className="h-8 w-8">
+              <FileBarChart className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger><TooltipContent>Weekly Report</TooltipContent></Tooltip>
 
           <Tooltip><TooltipTrigger asChild>
             <Button size="icon" variant="default" className="bg-gradient-primary text-primary-foreground shadow-sm hover:shadow-md transition-shadow h-8 w-8" onClick={() => setPrintOpen(true)}>
