@@ -185,11 +185,12 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
     minimal: "canvas-grid-bg theme-minimal",
     darkpro: "canvas-grid-bg theme-darkpro",
   };
+  const bgClass = showGrid ? (themeBg[theme] ?? "canvas-grid-bg") : "canvas-bg-plain";
 
   return (
     <div
       ref={containerRef}
-      className={`relative flex-1 overflow-hidden ${themeBg[theme] ?? "canvas-grid-bg"}`}
+      className={`relative flex-1 overflow-hidden ${bgClass}`}
       style={floor.bgColor ? { backgroundColor: `hsl(${floor.bgColor})` } : undefined}
       onMouseDown={(e) => {
         if (e.button === 1 || (e.button === 0 && e.altKey)) {
