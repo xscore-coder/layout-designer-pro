@@ -118,6 +118,7 @@ interface Store extends FloorPlanState {
   toggleLegend: () => void;
   toggleCompass: () => void;
   toggleScale: () => void;
+  toggleGrid: () => void;
   toggleCollision: () => void;
   setTheme: (t: ThemePreset) => void;
   renumberZones: () => void;
