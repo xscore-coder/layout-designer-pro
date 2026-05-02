@@ -250,9 +250,11 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
           </div>
 
           {/* Reports */}
-          <Button size="sm" variant="ghost" onClick={() => setDashboardOpen(true)} className="h-8">
-            <LayoutDashboard className="h-4 w-4 mr-1" /> <span className="hidden lg:inline">Dashboard</span>
-          </Button>
+          <Tooltip><TooltipTrigger asChild>
+            <Button size="icon" variant="ghost" onClick={() => setDashboardOpen(true)} className="h-8 w-8">
+              <LayoutDashboard className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger><TooltipContent>Dashboard</TooltipContent></Tooltip>
 
           <Tooltip><TooltipTrigger asChild>
             <Button size="icon" variant="ghost" onClick={() => setReportOpen(true)} className="h-8 w-8">
