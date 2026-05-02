@@ -105,6 +105,7 @@ export interface FloorPlanState {
   showCompass: boolean;
   showScale: boolean;
   showMiniMap: boolean;
+  showGrid: boolean;
   theme: ThemePreset;
   customPalette: string[];
   versions: Version[];

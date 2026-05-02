@@ -25,9 +25,11 @@ export function ThemePicker() {
   const showLegend = useFloorPlan((s) => s.showLegend);
   const showCompass = useFloorPlan((s) => s.showCompass);
   const showScale = useFloorPlan((s) => s.showScale);
+  const showGrid = useFloorPlan((s) => s.showGrid);
   const toggleLegend = useFloorPlan((s) => s.toggleLegend);
   const toggleCompass = useFloorPlan((s) => s.toggleCompass);
   const toggleScale = useFloorPlan((s) => s.toggleScale);
+  const toggleGrid = useFloorPlan((s) => s.toggleGrid);
   const renumberZones = useFloorPlan((s) => s.renumberZones);
 
   return (
@@ -52,6 +54,9 @@ export function ThemePicker() {
 
         <DropdownMenuSeparator />
         <DropdownMenuLabel>Editing aids</DropdownMenuLabel>
+        <DropdownMenuCheckboxItem checked={showGrid} onCheckedChange={toggleGrid}>
+          Show grid dots
+        </DropdownMenuCheckboxItem>
         <DropdownMenuCheckboxItem checked={snapToGrid} onCheckedChange={toggleSnap}>
           Snap to grid (10px)
         </DropdownMenuCheckboxItem>

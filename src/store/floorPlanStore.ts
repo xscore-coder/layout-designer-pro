@@ -118,6 +118,7 @@ interface Store extends FloorPlanState {
   toggleLegend: () => void;
   toggleCompass: () => void;
   toggleScale: () => void;
+  toggleGrid: () => void;
   toggleCollision: () => void;
   setTheme: (t: ThemePreset) => void;
   renumberZones: () => void;
@@ -182,6 +183,7 @@ export const useFloorPlan = create<Store>()(
       showCompass: true,
       showScale: true,
       showMiniMap: true,
+      showGrid: false,
       collisionDetection: false,
       theme: "modern",
       customPalette: [],
@@ -663,6 +665,7 @@ export const useFloorPlan = create<Store>()(
       toggleLegend: () => set((s) => ({ showLegend: !s.showLegend })),
       toggleCompass: () => set((s) => ({ showCompass: !s.showCompass })),
       toggleScale: () => set((s) => ({ showScale: !s.showScale })),
+      toggleGrid: () => set((s) => ({ showGrid: !s.showGrid })),
       toggleCollision: () => set((s) => ({ collisionDetection: !s.collisionDetection })),
       setTheme: (t) => set({ theme: t }),
       renumberZones: () =>
@@ -1068,6 +1071,7 @@ export const useFloorPlan = create<Store>()(
         showCompass: s.showCompass,
         showScale: s.showScale,
         showMiniMap: s.showMiniMap,
+        showGrid: s.showGrid,
         collisionDetection: s.collisionDetection,
         theme: s.theme,
         customPalette: s.customPalette,
