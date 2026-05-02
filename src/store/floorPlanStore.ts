@@ -542,7 +542,17 @@ export const useFloorPlan = create<Store>()(
           return { selectedZoneIds: ids, selectedZoneId: ids[ids.length - 1] ?? null };
         }),
       clearSelection: () =>
-        set({ selectedZoneId: null, selectedZoneIds: [], selectedSeatId: null, selectedSeatIds: [] }),
+        set((s) => {
+          if (
+            s.selectedZoneId === null &&
+            s.selectedSeatId === null &&
+            s.selectedZoneIds.length === 0 &&
+            s.selectedSeatIds.length === 0
+          ) {
+            return {};
+          }
+          return { selectedZoneId: null, selectedZoneIds: [], selectedSeatId: null, selectedSeatIds: [] };
+        }),
 
       selectSeat: (id, opts) =>
         set((s) => {
