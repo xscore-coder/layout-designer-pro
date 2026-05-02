@@ -54,6 +54,9 @@ export function ThemePicker() {
 
         <DropdownMenuSeparator />
         <DropdownMenuLabel>Editing aids</DropdownMenuLabel>
+        <DropdownMenuCheckboxItem checked={showGrid} onCheckedChange={toggleGrid}>
+          Show grid dots
+        </DropdownMenuCheckboxItem>
         <DropdownMenuCheckboxItem checked={snapToGrid} onCheckedChange={toggleSnap}>
           Snap to grid (10px)
         </DropdownMenuCheckboxItem>
