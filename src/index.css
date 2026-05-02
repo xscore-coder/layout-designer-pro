@@ -186,6 +186,10 @@
       linear-gradient(90deg, hsl(var(--canvas-grid)) 1px, transparent 1px);
     background-size: 20px 20px;
   }
+  .canvas-bg-plain {
+    background-color: hsl(var(--canvas-bg));
+    background-image: none;
+  }
 
   /* Theme presets — affect canvas backdrop only */
   .theme-blueprint {
