@@ -68,8 +68,8 @@ export function Inspector() {
           </div>
         </div>
         <h3 className="text-sm font-semibold mb-1.5">Nothing selected</h3>
-        <p className="text-xs text-muted-foreground max-w-[220px] leading-relaxed mb-4">
-          اختار <span className="text-foreground font-medium">Zone</span> أو <span className="text-foreground font-medium">Cell</span> من الكانفس أو من القائمة الجانبية عشان تعرض و تعدّل الخصائص.
+        <p dir="rtl" className="text-xs text-muted-foreground max-w-[260px] leading-relaxed mb-4 text-center">
+          اختر <span dir="ltr" className="inline-block text-foreground font-medium">Zone</span> أو <span dir="ltr" className="inline-block text-foreground font-medium">Cell</span> من الكانفس أو من القائمة الجانبية لعرض وتعديل الخصائص.
         </p>
         <div className="grid grid-cols-1 gap-1.5 text-[11px] text-muted-foreground w-full max-w-[240px]">
           <div className="flex items-center gap-2 rounded-md border border-border bg-muted/30 px-2.5 py-1.5">
