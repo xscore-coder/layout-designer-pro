@@ -114,7 +114,7 @@ export function Seat({ seat, zone, highlighted, heatmapMax }: Props) {
                 e.preventDefault();
                 select(seat.id);
               }}
-              title={`PC ${seat.pcNumber}${seat.lockNumber ? ` • Lock ${seat.lockNumber}` : ""}${seat.locked ? " • 🔒 Locked" : ""}${seat.hasProblem ? " • ⚠ Problem" : ""}${seat.problemCount ? ` • ${seat.problemCount} issue(s)` : ""}${seat.lastUpdate ? ` • ${seat.lastUpdate}` : ""}${seat.note ? `\n📝 ${seat.note}` : ""}\n(Click=select • Double-click=note • Right-click=menu)`}
+              title={`PC ${seat.pcNumber}${seat.lockNumber ? ` • Lock ${seat.lockNumber}` : ""}${seat.locked ? " • 🔒 Locked" : ""}${seat.hasProblem ? " • ⚠ Problem" : ""}${seat.problemCount ? ` • ${seat.problemCount} issue(s)` : ""}${seat.lastUpdate ? ` • ${seat.lastUpdate}` : ""}${seat.note ? `\n📝 ${seat.note}` : ""}\n(Click=select • Right-click=menu)`}
               className={cn(
                 "relative h-9 w-9 rounded-md flex items-center justify-center text-[10px] font-semibold transition-all duration-150",
                 "hover:scale-110 hover:z-10 hover:shadow-lg hover:brightness-110",
