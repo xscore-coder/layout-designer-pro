@@ -13,20 +13,21 @@ import { PanelLeft, PanelRight } from "lucide-react";
 const Index = () => {
   const [search, setSearch] = useState("");
   const canvasRef = useRef<CanvasHandle>(null);
-  const saveVersion = useFloorPlan((s) => s.saveVersion);
+  const ensureHourlySnapshot = useFloorPlan((s) => s.ensureHourlySnapshot);
   const isMobile = useIsMobile();
   const [leftOpen, setLeftOpen] = useState(false);
   const [rightOpen, setRightOpen] = useState(false);
   const selectedZoneId = useFloorPlan((s) => s.selectedZoneId);
   const selectedSeatId = useFloorPlan((s) => s.selectedSeatId);
 
-  // Auto-save snapshot every 60s
+  // Auto-save snapshot once per hour (idempotent)
   useEffect(() => {
+    ensureHourlySnapshot();
     const t = setInterval(() => {
-      saveVersion(`Auto-save ${new Date().toLocaleTimeString()}`);
+      ensureHourlySnapshot();
     }, 60_000);
     return () => clearInterval(t);
-  }, [saveVersion]);
+  }, [ensureHourlySnapshot]);
 
   // On mobile: auto-open inspector when something gets selected
   useEffect(() => {

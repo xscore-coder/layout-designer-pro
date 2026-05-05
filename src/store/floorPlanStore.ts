@@ -74,6 +74,8 @@ interface Store extends FloorPlanState {
   removeVersion: (id: string) => void;
   /** Save one version per day (idempotent). Returns true if a new version was saved. */
   ensureDailySnapshot: () => boolean;
+  /** Save one version per hour (idempotent). Returns true if a new version was saved. */
+  ensureHourlySnapshot: () => boolean;
 
   // palette
   addPaletteColor: (hsl: string) => void;
@@ -1046,6 +1048,26 @@ export const useFloorPlan = create<Store>()(
             ...st.versions,
           ].slice(0, 60),
           changeLog: log(st, "Daily auto-snapshot", tag),
+        }));
+        return true;
+      },
+
+      ensureHourlySnapshot: () => {
+        const now = new Date();
+        const tag = `Hourly ${now.toISOString().slice(0, 13)}:00`;
+        const s = get();
+        if (s.versions.some((v) => v.label === tag)) return false;
+        set((st) => ({
+          versions: [
+            {
+              id: uid(),
+              date: now.toISOString(),
+              label: tag,
+              data: { floors: JSON.parse(JSON.stringify(st.floors)) },
+            },
+            ...st.versions,
+          ].slice(0, 60),
+          changeLog: log(st, "Hourly auto-snapshot", tag),
         }));
         return true;
       },
