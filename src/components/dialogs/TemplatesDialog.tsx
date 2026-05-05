@@ -301,9 +301,9 @@ export function TemplatesDialog({ open, onOpenChange }: Props) {
                     <div className="flex items-start justify-between">
                       <div
                         className="h-10 w-10 rounded-lg flex items-center justify-center"
-                        style={{ background: `hsl(${t.accent} / 0.15)` }}
+                        style={{ background: `hsl(${t.accent} / 0.15)`, color: `hsl(${t.accent})` }}
                       >
-                        <Icon className="h-5 w-5" style={{ color: `hsl(${t.accent})` }} />
+                        <Icon className="h-5 w-5" />
                       </div>
                       <Badge variant="outline" className="text-[10px]">{t.category}</Badge>
                     </div>
