@@ -74,6 +74,8 @@ interface Store extends FloorPlanState {
   removeVersion: (id: string) => void;
   /** Save one version per day (idempotent). Returns true if a new version was saved. */
   ensureDailySnapshot: () => boolean;
+  /** Save one version per hour (idempotent). Returns true if a new version was saved. */
+  ensureHourlySnapshot: () => boolean;
 
   // palette
   addPaletteColor: (hsl: string) => void;
