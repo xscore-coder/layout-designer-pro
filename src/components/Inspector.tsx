@@ -294,7 +294,18 @@ export function Inspector() {
                         <Lock className="h-3 w-3" /> Locked
                       </Badge>
                     )}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="ml-auto h-7 px-2 text-xs gap-1"
+                      onClick={() => setQrOpen(true)}
+                      title="Generate QR code for this PC"
+                    >
+                      <QrCode className="h-3.5 w-3.5" /> QR
+                    </Button>
                   </div>
+
+                  <QRCodeDialog open={qrOpen} onOpenChange={setQrOpen} zone={zone} seat={seat} />
 
                   {/* Lock toggle */}
                   <div
