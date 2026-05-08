@@ -16,8 +16,10 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { ColorPicker } from "./ColorPicker";
 import {
   Lock, Unlock, Copy, Trash2, Plus, AlertTriangle, Info, Ungroup, X, ShieldCheck, Sparkles,
-  Monitor, MinusCircle, CalendarIcon,
+  Monitor, MinusCircle, CalendarIcon, QrCode,
 } from "lucide-react";
+import { QRCodeDialog } from "./dialogs/QRCodeDialog";
+import { useState } from "react";
 import type { SeatType } from "@/types/floorplan";
 import { toast } from "sonner";
 import { format, parseISO, isValid } from "date-fns";
@@ -43,6 +45,7 @@ const NOTE_TEMPLATES = [
 ];
 
 export function Inspector() {
+  const [qrOpen, setQrOpen] = useState(false);
   const floor = useActiveFloor();
   const selectedZoneId = useFloorPlan((s) => s.selectedZoneId);
   const selectedSeatId = useFloorPlan((s) => s.selectedSeatId);
@@ -291,7 +294,18 @@ export function Inspector() {
                         <Lock className="h-3 w-3" /> Locked
                       </Badge>
                     )}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="ml-auto h-7 px-2 text-xs gap-1"
+                      onClick={() => setQrOpen(true)}
+                      title="Generate QR code for this PC"
+                    >
+                      <QrCode className="h-3.5 w-3.5" /> QR
+                    </Button>
                   </div>
+
+                  <QRCodeDialog open={qrOpen} onOpenChange={setQrOpen} zone={zone} seat={seat} />
 
                   {/* Lock toggle */}
                   <div
