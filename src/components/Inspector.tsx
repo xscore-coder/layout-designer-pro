@@ -16,8 +16,10 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { ColorPicker } from "./ColorPicker";
 import {
   Lock, Unlock, Copy, Trash2, Plus, AlertTriangle, Info, Ungroup, X, ShieldCheck, Sparkles,
-  Monitor, MinusCircle, CalendarIcon,
+  Monitor, MinusCircle, CalendarIcon, QrCode,
 } from "lucide-react";
+import { QRCodeDialog } from "./dialogs/QRCodeDialog";
+import { useState } from "react";
 import type { SeatType } from "@/types/floorplan";
 import { toast } from "sonner";
 import { format, parseISO, isValid } from "date-fns";
@@ -43,6 +45,7 @@ const NOTE_TEMPLATES = [
 ];
 
 export function Inspector() {
+  const [qrOpen, setQrOpen] = useState(false);
   const floor = useActiveFloor();
   const selectedZoneId = useFloorPlan((s) => s.selectedZoneId);
   const selectedSeatId = useFloorPlan((s) => s.selectedSeatId);
