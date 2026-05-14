@@ -72,6 +72,8 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
   const ensureDailySnapshot = useFloorPlan((s) => s.ensureDailySnapshot);
   const activeFloorId = useFloorPlan((s) => s.activeFloorId);
   const updateFloor = useFloorPlan((s) => s.updateFloor);
+  const drawingTool = useFloorPlan((s) => s.drawingTool);
+  const setDrawingTool = useFloorPlan((s) => s.setDrawingTool);
 
   // Daily auto-snapshot on app load (one per calendar day)
   useEffect(() => {
