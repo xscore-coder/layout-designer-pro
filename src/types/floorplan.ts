@@ -71,10 +71,22 @@ export interface Zone {
   parentId?: string;
 }
 
+export type ShapeKind = "wall" | "door" | "window" | "rect" | "line";
+
+export interface Shape {
+  id: string;
+  kind: ShapeKind;
+  /** Endpoints (for line/wall/door/window) OR rect corners (top-left → bottom-right) */
+  x1: number; y1: number; x2: number; y2: number;
+  thickness?: number;
+  color?: string;
+}
+
 export interface Floor {
   id: string;
   name: string;
   zones: Zone[];
+  shapes?: Shape[];
   locked?: boolean;
   bgColor?: string; // optional HSL, overrides theme background
 }
