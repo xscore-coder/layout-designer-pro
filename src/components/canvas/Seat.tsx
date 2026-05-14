@@ -97,8 +97,8 @@ export function Seat({ seat, zone, highlighted, heatmapMax }: Props) {
           setNoteOpen(o);
         }}
       >
-        <ContextMenuTrigger asChild>
-          <PopoverTrigger asChild>
+        <PopoverTrigger asChild>
+          <ContextMenuTrigger asChild>
             <button
               type="button"
               data-seat-id={seat.id}
