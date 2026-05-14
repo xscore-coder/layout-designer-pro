@@ -704,6 +704,43 @@ export const useFloorPlan = create<Store>()(
           })
         ),
 
+      // ============= SHAPES (drawing layer) =============
+      setDrawingTool: (t) => set({ drawingTool: t, selectedShapeId: null }),
+      selectShape: (id) => set({ selectedShapeId: id }),
+      addShape: (shape) =>
+        set((s) => {
+          const af = activeFloor(s);
+          if (af?.locked) return {};
+          const ns: Shape = { id: uid(), ...shape };
+          return withHistory(s, {
+            floors: updateActiveFloor(s, (f) => ({ ...f, shapes: [...(f.shapes ?? []), ns] })),
+            selectedShapeId: ns.id,
+            changeLog: log(s, "Added shape", shape.kind),
+          });
+        }),
+      updateShape: (id, patch) =>
+        set((s) => {
+          const af = activeFloor(s);
+          if (af?.locked) return {};
+          return withHistory(s, {
+            floors: updateActiveFloor(s, (f) => ({
+              ...f,
+              shapes: (f.shapes ?? []).map((sh) => (sh.id === id ? { ...sh, ...patch } : sh)),
+            })),
+          });
+        }),
+      removeShape: (id) =>
+        set((s) =>
+          withHistory(s, {
+            floors: updateActiveFloor(s, (f) => ({
+              ...f,
+              shapes: (f.shapes ?? []).filter((sh) => sh.id !== id),
+            })),
+            selectedShapeId: s.selectedShapeId === id ? null : s.selectedShapeId,
+            changeLog: log(s, "Removed shape"),
+          })
+        ),
+
       moveSelectedBy: (dx, dy) =>
         set((s) => {
           const ids = new Set(s.selectedZoneIds);
