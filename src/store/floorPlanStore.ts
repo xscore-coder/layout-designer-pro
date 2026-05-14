@@ -11,6 +11,8 @@ import type {
   Shift,
   SpaceKind,
   ThemePreset,
+  Shape,
+  ShapeKind,
 } from "@/types/floorplan";
 
 const SNAP_GRID = 10;
@@ -125,6 +127,13 @@ interface Store extends FloorPlanState {
   setTheme: (t: ThemePreset) => void;
   renumberZones: () => void;
 
+  // shapes (drawing layer)
+  setDrawingTool: (t: ShapeKind | null) => void;
+  addShape: (s: Omit<Shape, "id">) => void;
+  updateShape: (id: string, patch: Partial<Shape>) => void;
+  removeShape: (id: string) => void;
+  selectShape: (id: string | null) => void;
+
   // multi-zone ops
   moveSelectedBy: (dx: number, dy: number) => void;
   alignSelected: (mode: "left" | "right" | "top" | "bottom" | "centerX" | "centerY") => void;
@@ -176,6 +185,8 @@ export const useFloorPlan = create<Store>()(
       selectedZoneIds: [],
       selectedSeatId: null,
       selectedSeatIds: [],
+      selectedShapeId: null,
+      drawingTool: null,
       darkMode: false,
       heatmap: false,
       zoom: 1,
@@ -690,6 +701,43 @@ export const useFloorPlan = create<Store>()(
               ),
             })),
             changeLog: log(s, "Renumbered zones"),
+          })
+        ),
+
+      // ============= SHAPES (drawing layer) =============
+      setDrawingTool: (t) => set({ drawingTool: t, selectedShapeId: null }),
+      selectShape: (id) => set({ selectedShapeId: id }),
+      addShape: (shape) =>
+        set((s) => {
+          const af = activeFloor(s);
+          if (af?.locked) return {};
+          const ns: Shape = { id: uid(), ...shape };
+          return withHistory(s, {
+            floors: updateActiveFloor(s, (f) => ({ ...f, shapes: [...(f.shapes ?? []), ns] })),
+            selectedShapeId: ns.id,
+            changeLog: log(s, "Added shape", shape.kind),
+          });
+        }),
+      updateShape: (id, patch) =>
+        set((s) => {
+          const af = activeFloor(s);
+          if (af?.locked) return {};
+          return withHistory(s, {
+            floors: updateActiveFloor(s, (f) => ({
+              ...f,
+              shapes: (f.shapes ?? []).map((sh) => (sh.id === id ? { ...sh, ...patch } : sh)),
+            })),
+          });
+        }),
+      removeShape: (id) =>
+        set((s) =>
+          withHistory(s, {
+            floors: updateActiveFloor(s, (f) => ({
+              ...f,
+              shapes: (f.shapes ?? []).filter((sh) => sh.id !== id),
+            })),
+            selectedShapeId: s.selectedShapeId === id ? null : s.selectedShapeId,
+            changeLog: log(s, "Removed shape"),
           })
         ),
 

@@ -7,6 +7,7 @@ import {
   Plus, Square, Combine, History, FileBarChart, Download,
   Upload, Undo2, Redo2, Moon, Sun, Flame, LayoutGrid, Trash2, FileSpreadsheet, Printer, ShieldAlert,
   Group, LayoutTemplate, Save, LayoutDashboard, Eraser,
+  MousePointer2, Minus, RectangleHorizontal, DoorOpen, AppWindow, Slash,
 } from "lucide-react";
 import { AddZoneDialog } from "./dialogs/AddZoneDialog";
 import { AddSpaceDialog } from "./dialogs/AddSpaceDialog";
@@ -71,6 +72,8 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
   const ensureDailySnapshot = useFloorPlan((s) => s.ensureDailySnapshot);
   const activeFloorId = useFloorPlan((s) => s.activeFloorId);
   const updateFloor = useFloorPlan((s) => s.updateFloor);
+  const drawingTool = useFloorPlan((s) => s.drawingTool);
+  const setDrawingTool = useFloorPlan((s) => s.setDrawingTool);
 
   // Daily auto-snapshot on app load (one per calendar day)
   useEffect(() => {
@@ -188,6 +191,34 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
               <LayoutTemplate className="h-4 w-4 mr-1" /> Templates
             </Button>
           </TooltipTrigger><TooltipContent>Insert pre-built layout</TooltipContent></Tooltip>
+        </div>
+
+        <div className="h-7 w-px bg-border mx-1" />
+
+        {/* Draw group — walls, doors, windows, shapes */}
+        <div className="flex items-center gap-0.5 rounded-lg bg-muted/40 p-0.5 shrink-0">
+          {([
+            { tool: null, icon: MousePointer2, label: "Select (Esc)" },
+            { tool: "wall" as const, icon: Minus, label: "Wall (hold Shift = 0/45/90°)" },
+            { tool: "door" as const, icon: DoorOpen, label: "Door" },
+            { tool: "window" as const, icon: AppWindow, label: "Window" },
+            { tool: "rect" as const, icon: RectangleHorizontal, label: "Rectangle" },
+            { tool: "line" as const, icon: Slash, label: "Line / Dimension" },
+          ]).map(({ tool, icon: Icon, label }) => (
+            <Tooltip key={label}>
+              <TooltipTrigger asChild>
+                <Button
+                  size="icon"
+                  variant={drawingTool === tool ? "default" : "ghost"}
+                  className="h-8 w-8"
+                  onClick={() => setDrawingTool(tool)}
+                >
+                  <Icon className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{label}</TooltipContent>
+            </Tooltip>
+          ))}
         </div>
 
         <div className="h-7 w-px bg-border mx-1" />

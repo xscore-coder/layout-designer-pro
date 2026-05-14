@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ZoomIn, ZoomOut, Maximize, Ruler, Lock } from "lucide-react";
 import { AlignmentToolbar } from "@/components/AlignmentToolbar";
 import { BulkSeatActions } from "@/components/BulkSeatActions";
+import { ShapeLayer } from "./ShapeLayer";
 
 interface Props { searchQuery: string }
 
@@ -34,6 +35,7 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
   const showLegend = useFloorPlan((s) => s.showLegend);
   const theme = useFloorPlan((s) => s.theme);
   const showGrid = useFloorPlan((s) => s.showGrid);
+  const drawingTool = useFloorPlan((s) => s.drawingTool);
   const groupSelected = useFloorPlan((s) => s.groupSelectedAsSpace);
   const containerRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
@@ -214,6 +216,8 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
         ref={stageRef}
         data-canvas-stage
         onMouseDown={(e) => {
+          // Drawing tool active — let ShapeLayer handle it; suppress lasso
+          if (drawingTool) return;
           // Only initiate lasso when clicking the stage background (not a zone/seat)
           if (e.target === e.currentTarget && e.button === 0 && !e.altKey) {
             const rect = stageRef.current!.getBoundingClientRect();
@@ -241,6 +245,9 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
             otherZones={otherZones}
           />
         ))}
+
+        {/* Drawing layer (walls, doors, windows, rectangles, lines) */}
+        <ShapeLayer zoom={zoom} />
 
         {/* Lasso (marquee) rectangle — drawn in stage (canvas) coordinates */}
         {lasso && (
