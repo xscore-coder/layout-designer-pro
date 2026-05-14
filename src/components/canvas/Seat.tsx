@@ -3,7 +3,7 @@ import { useFloorPlan } from "@/store/floorPlanStore";
 import type { Seat as SeatT, SeatType, Zone } from "@/types/floorplan";
 import { cn } from "@/lib/utils";
 import { Monitor, AlertTriangle, MinusCircle, StickyNote, X, Lock, Unlock, Pencil } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger, PopoverAnchor } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import {
@@ -97,8 +97,8 @@ export function Seat({ seat, zone, highlighted, heatmapMax }: Props) {
           setNoteOpen(o);
         }}
       >
-        <ContextMenuTrigger asChild>
-          <PopoverTrigger asChild>
+        <PopoverAnchor asChild>
+          <ContextMenuTrigger asChild>
             <button
               type="button"
               data-seat-id={seat.id}
@@ -153,8 +153,8 @@ export function Seat({ seat, zone, highlighted, heatmapMax }: Props) {
                 </span>
               )}
             </button>
-          </PopoverTrigger>
-        </ContextMenuTrigger>
+          </ContextMenuTrigger>
+        </PopoverAnchor>
 
         <PopoverContent
           className="w-72 p-3"
