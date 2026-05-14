@@ -97,7 +97,7 @@ export function Seat({ seat, zone, highlighted, heatmapMax }: Props) {
           setNoteOpen(o);
         }}
       >
-        <PopoverTrigger asChild>
+        <PopoverAnchor asChild>
           <ContextMenuTrigger asChild>
             <button
               type="button"
@@ -153,8 +153,8 @@ export function Seat({ seat, zone, highlighted, heatmapMax }: Props) {
                 </span>
               )}
             </button>
-          </PopoverTrigger>
-        </ContextMenuTrigger>
+          </ContextMenuTrigger>
+        </PopoverAnchor>
 
         <PopoverContent
           className="w-72 p-3"
