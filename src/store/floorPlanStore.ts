@@ -176,6 +176,8 @@ export const useFloorPlan = create<Store>()(
       selectedZoneIds: [],
       selectedSeatId: null,
       selectedSeatIds: [],
+      selectedShapeId: null,
+      drawingTool: null,
       darkMode: false,
       heatmap: false,
       zoom: 1,
