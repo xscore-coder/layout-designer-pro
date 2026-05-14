@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ZoomIn, ZoomOut, Maximize, Ruler, Lock } from "lucide-react";
 import { AlignmentToolbar } from "@/components/AlignmentToolbar";
 import { BulkSeatActions } from "@/components/BulkSeatActions";
+import { ShapeLayer } from "./ShapeLayer";
 
 interface Props { searchQuery: string }
 
