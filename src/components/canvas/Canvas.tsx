@@ -246,6 +246,9 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
           />
         ))}
 
+        {/* Drawing layer (walls, doors, windows, rectangles, lines) */}
+        <ShapeLayer zoom={zoom} />
+
         {/* Lasso (marquee) rectangle — drawn in stage (canvas) coordinates */}
         {lasso && (
           <div
