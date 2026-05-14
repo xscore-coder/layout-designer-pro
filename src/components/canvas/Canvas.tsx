@@ -216,6 +216,8 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ searchQu
         ref={stageRef}
         data-canvas-stage
         onMouseDown={(e) => {
+          // Drawing tool active — let ShapeLayer handle it; suppress lasso
+          if (drawingTool) return;
           // Only initiate lasso when clicking the stage background (not a zone/seat)
           if (e.target === e.currentTarget && e.button === 0 && !e.altKey) {
             const rect = stageRef.current!.getBoundingClientRect();
