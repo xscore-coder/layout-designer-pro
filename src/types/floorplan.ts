@@ -107,6 +107,8 @@ export interface FloorPlanState {
   selectedZoneIds: string[];
   selectedSeatId: string | null;
   selectedSeatIds: string[];
+  selectedShapeId: string | null;
+  drawingTool: ShapeKind | null;
   collisionDetection: boolean;
   darkMode: boolean;
   heatmap: boolean;
