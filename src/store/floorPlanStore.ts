@@ -127,6 +127,13 @@ interface Store extends FloorPlanState {
   setTheme: (t: ThemePreset) => void;
   renumberZones: () => void;
 
+  // shapes (drawing layer)
+  setDrawingTool: (t: ShapeKind | null) => void;
+  addShape: (s: Omit<Shape, "id">) => void;
+  updateShape: (id: string, patch: Partial<Shape>) => void;
+  removeShape: (id: string) => void;
+  selectShape: (id: string | null) => void;
+
   // multi-zone ops
   moveSelectedBy: (dx: number, dy: number) => void;
   alignSelected: (mode: "left" | "right" | "top" | "bottom" | "centerX" | "centerY") => void;
