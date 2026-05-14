@@ -11,6 +11,8 @@ import type {
   Shift,
   SpaceKind,
   ThemePreset,
+  Shape,
+  ShapeKind,
 } from "@/types/floorplan";
 
 const SNAP_GRID = 10;
