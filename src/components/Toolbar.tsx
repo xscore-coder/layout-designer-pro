@@ -195,6 +195,34 @@ export function Toolbar({ search, onSearchChange, getStageEl }: Props) {
 
         <div className="h-7 w-px bg-border mx-1" />
 
+        {/* Draw group — walls, doors, windows, shapes */}
+        <div className="flex items-center gap-0.5 rounded-lg bg-muted/40 p-0.5 shrink-0">
+          {([
+            { tool: null, icon: MousePointer2, label: "Select (Esc)" },
+            { tool: "wall" as const, icon: Minus, label: "Wall (hold Shift = 0/45/90°)" },
+            { tool: "door" as const, icon: DoorOpen, label: "Door" },
+            { tool: "window" as const, icon: AppWindow, label: "Window" },
+            { tool: "rect" as const, icon: RectangleHorizontal, label: "Rectangle" },
+            { tool: "line" as const, icon: Slash, label: "Line / Dimension" },
+          ]).map(({ tool, icon: Icon, label }) => (
+            <Tooltip key={label}>
+              <TooltipTrigger asChild>
+                <Button
+                  size="icon"
+                  variant={drawingTool === tool ? "default" : "ghost"}
+                  className="h-8 w-8"
+                  onClick={() => setDrawingTool(tool)}
+                >
+                  <Icon className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{label}</TooltipContent>
+            </Tooltip>
+          ))}
+        </div>
+
+        <div className="h-7 w-px bg-border mx-1" />
+
         {/* History group */}
         <div className="flex items-center gap-0.5 rounded-lg bg-muted/40 p-0.5 shrink-0">
           <Tooltip><TooltipTrigger asChild>
