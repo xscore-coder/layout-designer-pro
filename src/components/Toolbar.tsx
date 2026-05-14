@@ -7,6 +7,7 @@ import {
   Plus, Square, Combine, History, FileBarChart, Download,
   Upload, Undo2, Redo2, Moon, Sun, Flame, LayoutGrid, Trash2, FileSpreadsheet, Printer, ShieldAlert,
   Group, LayoutTemplate, Save, LayoutDashboard, Eraser,
+  MousePointer2, Minus, RectangleHorizontal, DoorOpen, AppWindow, Slash,
 } from "lucide-react";
 import { AddZoneDialog } from "./dialogs/AddZoneDialog";
 import { AddSpaceDialog } from "./dialogs/AddSpaceDialog";
