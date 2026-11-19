@@ -49,6 +49,18 @@ KALI_SUPPLEMENTAL_REPOSITORIES = [
     ("https://github.com/antoniaci/blackbird", "blackbird"),
     ("https://github.com/maldevel/EmailHarvester", "EmailHarvester"),
 ]
+REPOSITORY_ALIASES = {
+    "https://github.com/p1ngul1n0/blackbird": "https://github.com/antoniaci/blackbird",
+}
+INVALID_REPOSITORIES = {
+    "https://github.com/entynetproject/phunter",
+    "https://github.com/sublime-security/emailrep",
+    "https://github.com/rog3rsm1th/profil3r",
+    "https://github.com/soxoj/glit",
+    "https://github.com/persian-tools/persian-tools",
+    "https://github.com/iban4j/iban4j",
+    "https://github.com/arhs/iban.js",
+}
 
 
 @dataclass
@@ -94,6 +106,9 @@ def merge_repositories(*groups: Iterable[tuple[str, str]]) -> list[tuple[str, st
     merged: dict[str, tuple[str, str]] = {}
     for group in groups:
         for url, name in group:
+            url = REPOSITORY_ALIASES.get(url.rstrip("/").lower(), url.rstrip("/"))
+            if url.lower() in INVALID_REPOSITORIES:
+                continue
             key = url.rstrip("/").lower()
             merged.setdefault(key, (url.rstrip("/"), name))
     return list(merged.values())
